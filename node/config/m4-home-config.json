@@ -1,0 +1,9 @@
+{
+  "db": {
+    "user": "dx3",
+    "password": "root",
+    "host": "localhost",
+    "port": 5432,
+    "database": "storix"
+  }
+}

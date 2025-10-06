@@ -2,6 +2,8 @@ import http from 'http';
 import path from 'path';
 import fs from 'fs';
 import Response from './response.js';
+import DB from './db.js';
+import os from 'os';
 
 export default class BrookHttp {
 
@@ -9,15 +11,24 @@ export default class BrookHttp {
     this.port   = port;
     this.host   = host;
     this.server = null;
-    this.response = new Response();
-    this.helper = new BrookHelper();
+
+    this.config      = new Config();
+    this.gatekeeper = new Gatekeeper();
+    this.helper     = new BrookHelper();
+    this.response   = new Response();
+    this.db         = new DB();
   }
 
   async perform () {
 
     // ... create gatekeeper object ...
-    this.gatekeeper = new Gatekeeper();
     await this.gatekeeper.load();
+
+    // ... create config object ...
+    await this.config.load();
+
+    // ... create pool of postgres ...
+    await this.db.load(this.config);
 
     // ... bind client handler to server ...
     this.server = http.createServer(this.accept.bind(this));
@@ -85,6 +96,24 @@ export default class BrookHttp {
    * @param {res} Response reference
    */
   fs (req, res) {
+  }
+
+}
+
+class Config {
+  constructor () {
+    var machine_name = os.hostname().toLocaleLowerCase().replace(/[&\/\\#,+()$~%.'":*?<>{}]/g,'-') + '-' + 'config.json'
+    this.file = path.join(import.meta.dirname, '../config/', machine_name);
+    this.data = null;
+  }
+
+  async load () {
+    this.data = fs.readFileSync(this.file, 'utf8');
+    this.data = JSON.parse(this.data);
+  }
+
+  parse_db () {
+    return this.data.db;
   }
 
 }

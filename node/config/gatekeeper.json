@@ -2,6 +2,6 @@
   {
     "method": ["GET", "POST"],
     "route": "^/login(.+)?",
-    "job": "auths"
+    "job": "auth"
   }
 ]
