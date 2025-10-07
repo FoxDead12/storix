@@ -33,14 +33,13 @@ export default class HTTP {
 
   async accept (req, res) {
     try {
-
-      const gate = this._gatekeeper.checkRoute(req.method, req.url);
-      if (!gate) {
+      /// ... validate route from gatekeeper ...
+      const routeGatekeeper = this._gatekeeper.checkRoute(req.method, req.url);
+      if (!routeGatekeeper) {
         throw '404 NÃO TEM PERMISSÃO';
       }
-
-      await this.handle(req, res);
-
+      // ...
+      await this.handle(req, res, routeGatekeeper);
     } catch (err) {
       console.error(err);
     }

@@ -13,7 +13,7 @@ export default class GATEKEEPER {
   }
 
   checkRoute (method, url) {
-    const gate = this.data.find(route => url.match(route["route"]));
+    const gate = this.gatekeeper.find(route => url.match(route["route"]));
     if (!gate || !gate.method.includes(method)) {
       return null;
     } else {

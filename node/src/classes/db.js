@@ -22,7 +22,7 @@ export default class DB {
     await this.pool.connect();
   }
 
-  freeCon (con) {
+  freeConn (con) {
     con.release();
   }
 

@@ -6,7 +6,7 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "start": "node brook_http"
+    "broker": "node --env-file=.env server-broker.js"
   },
   "dependencies": {
     "pg": "^8.16.3"
