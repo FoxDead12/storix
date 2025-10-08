@@ -1,32 +1,39 @@
 
 export default class Job {
 
-  constructor (req, res, config) {
+  constructor (req, res, server) {
     this.req = req;
     this.res = res;
-    this.config = config;
+    this.server = server;
+    this.db = this.server._pooldb;
   }
 
-  async execute () {
-    try {
-      await this.perform();
-    } catch (err) {
-      console.error(err)
-    }
+  sendResponse ({message, response}) {
+
+    this.res.statusCode = 200;
+    this.res.setHeader('Content-Type', 'application/json');
+
+    const payload = {
+      status: 200,
+      message: message,
+      response: response
+    };
+    this.res.end(JSON.stringify(payload));
+
   }
 
-  static get query () {
-    return false;
-  }
-  static set query (pool) {
-    this.db = pool;
-  }
+  reportError ({message, response}) {
 
-  static set transaction (con) {
-    this.db = con;
-  }
-  static get transaction () {
-    return false;
+    this.res.statusCode = 400;
+    this.res.setHeader('Content-Type', 'application/json');
+
+    const payload = {
+      status: 400,
+      message: message,
+      response: response
+    };
+    this.res.end(JSON.stringify(payload));
+
   }
 
 }

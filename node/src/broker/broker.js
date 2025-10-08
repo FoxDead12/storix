@@ -22,30 +22,9 @@ export default class Broker extends HTTP {
     }
 
     // ... create job instance ...
-    const job = new jobClass(req, res, this._config);
-
-    // // ... set options of job ...
-    // if (job.transaction === true) {
-    //   const con = await this._pooldb.getConn();
-    //   job.transaction(con);
-    // } else if (job.query === true) {
-    //   job.query(this.pooldb);
-    // }
-
-  }
-
-  async job (req, res, routeGatekeeper) {
-
-    const jobKey = routeGatekeeper.job;
-    const jobClass = jobs[jobKey];
-    if (!jobClass) {
-      throw '500 ERRO INTERNO, NAO TEM JOB DEFINIDO NO FICHEIRO DE JOBS';
-    }
-
-    const db = await this._pooldb.getConn();
-    const job = new jobClass(req, res, this._config, {db: db});
+    const job = new jobClass(req, res, this);
     await job.perform();
-    this._pooldb.freeCon(db);
+
   }
 
 }
