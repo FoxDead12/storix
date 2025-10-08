@@ -35,11 +35,12 @@ export default class HTTP {
     try {
       const routeGatekeeper = this._gatekeeper.checkRoute(req.method, req.url);
       if (!routeGatekeeper) {
-        throw '404 NÃO TEM PERMISSÃO';
+        return this.reportError(res, {status: 404, message: 'GATEKEEPER_NOT_FOUND'})
       }
       await this.handle(req, res, routeGatekeeper);
     } catch (err) {
       console.error(err);
+      return this.reportError(res, {status: 500, message: 'An unexpected error occurred'})
     }
   }
 
@@ -50,6 +51,17 @@ export default class HTTP {
     // ...
     this._gatekeeper.init();
     await this._pooldb.init();
+  }
+
+  reportError (res, {status, message, response}) {
+    res.statusCode = status;
+    res.setHeader('Content-Type', 'application/json');
+    const payload = {
+      status: status,
+      message: message,
+      response: response
+    };
+    res.end(JSON.stringify(payload));
   }
 
   get config () {

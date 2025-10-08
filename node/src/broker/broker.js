@@ -12,13 +12,13 @@ export default class Broker extends HTTP {
     // ... get job key from gatekeeper ...
     const jobKey = routeGatekeeper.job;
     if (!jobKey) {
-      throw '500 ERRO INTERNO, NAO TEM JOB DEFINIDO NO GATEKEEPER';
+      return this.reportError(res, {status: 500, message: 'GATEKEEPER_JOB_NOT_DEFINE'});
     }
 
     // ... get job class from jobs array ...
     const jobClass = jobs[jobKey];
     if (!jobClass) {
-      throw '500 ERRO INTERNO, NAO TEM JOB DEFINIDO NO FICHEIRO DE JOBS';
+      return this.reportError(res, {status: 500, message: 'JOB_NOT_EXIST'});
     }
 
     // ... create job instance ...

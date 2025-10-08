@@ -4,8 +4,8 @@ export default class Job {
   constructor (req, res, server) {
     this.req = req;
     this.res = res;
-    this.server = server;
-    this.db = this.server._pooldb;
+    this.db = server._pooldb;
+    this.config = server.config;
   }
 
   sendResponse ({message, response}) {
