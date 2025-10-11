@@ -6,7 +6,8 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "broker": "node --env-file=.env server-broker.js"
+    "broker": "node --env-file=.env server-broker.js",
+    "migrate:up": "node --env-file=.env db/migrator/migrator.js"
   },
   "dependencies": {
     "pg": "^8.16.3"
