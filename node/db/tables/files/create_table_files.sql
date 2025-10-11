@@ -2,7 +2,7 @@ DROP FUNCTION IF EXISTS sharded.create_table_files;
 CREATE OR REPLACE FUNCTION sharded.create_table_files (
   IN _user_id integer,
   IN _schema  text
-) RETURN void AS $BODY$
+) RETURNS void AS $BODY$
 DECLARE
   _query  text;
 BEGIN
@@ -13,8 +13,8 @@ BEGIN
       format            TEXT          NOT NULL,
       size              BIGINT        NOT NULL,
       path              TEXT          NOT NULL,
-      folder_id         INTEGER       NOT NULL,     DEFAULT %2$L,    -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
-      user_id           INTEGER       NOT NULL      DEFAULT NULL, -- IN MIGRATION CHANGE TO USER ID
+      folder_id         INTEGER       NOT NULL     DEFAULT NULL,    -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
+      user_id           INTEGER       NOT NULL      DEFAULT %2$s, -- IN MIGRATION CHANGE TO USER ID
       create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
       update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP
     );
@@ -22,5 +22,6 @@ BEGIN
 
   EXECUTE _query;
 
+  RETURN;
 END;
 $BODY$ LANGUAGE 'plpgsql';

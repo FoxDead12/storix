@@ -1,6 +1,11 @@
 [
   {
-    "method": ["GET", "POST"],
+    "method": ["POST"],
+    "route": "^/register",
+    "job": "register"
+  },
+  {
+    "method": ["POST"],
     "route": "^/login(.+)?",
     "job": "login"
   }

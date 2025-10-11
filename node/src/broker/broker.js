@@ -22,9 +22,31 @@ export default class Broker extends HTTP {
     }
 
     // ... create job instance ...
-    const job = new jobClass(req, res, this);
-    await job.perform();
+    const jobPayload = {};
 
+    if (req.method == 'POST' || req.method == 'PATCH') {
+      const body = await this.parseBody(req);
+      jobPayload.body = JSON.parse(body);
+    }
+
+    const job = new jobClass(req, res, this);
+    await job.perform(jobPayload);
+
+  }
+
+  async parseBody (req) {
+    return await new Promise((res, rej) => {
+      const body = [];
+      req.on('data', chunk => {
+        body.push(chunk);
+      })
+      .on('end', () => {
+        res(Buffer.concat(body).toString());
+      })
+      .on('error', err => {
+        rej(err);
+      })
+    });
   }
 
 }

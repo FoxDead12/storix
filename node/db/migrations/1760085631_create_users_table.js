@@ -6,25 +6,25 @@ export default class CreateUsersTable extends MigrationTransaction {
 
     // ... create necessary schemas to project ...
     await this.execute(`
-      CREATE SCHEMA sharded;
-      CREATE SCHEMA functions;
+      CREATE SCHEMA IF NOT EXISTS sharded;
+      CREATE SCHEMA IF NOT EXISTS functions;
     `);
 
     // ... create table user ...
     await this.execute(`
-      CREATE TABLE public.users (
+      CREATE TABLE users (
         id                SERIAL        PRIMARY KEY,
         name              TEXT          NOT NULL,
         email             TEXT          NOT NULL,
         encrypt_password  VARCHAR(64)   NOT NULL,
         u_schema          TEXT          NOT NULL,
+        deleted           BOOLEAN       NOT NULL      DEFAULT FALSE,
         create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
         update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
     // ... create triggers ...
-    // ... functions.trf_before_insert_user
     await this.execute(`
       DROP FUNCTION IF EXISTS functions.trf_before_insert_user;
       CREATE OR REPLACE FUNCTION functions.trf_before_insert_user ()
@@ -36,7 +36,6 @@ export default class CreateUsersTable extends MigrationTransaction {
       $BODY$ LANGUAGE 'plpgsql';
     `);
 
-    // ... functions.trf_after_insert_user
     await this.execute(`
       DROP FUNCTION IF EXISTS functions.trf_after_insert_user;
       CREATE OR REPLACE FUNCTION functions.trf_after_insert_user ()
