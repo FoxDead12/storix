@@ -39,6 +39,12 @@ export default class HTTP {
       }
       await this.handle(req, res, routeGatekeeper);
     } catch (err) {
+
+      if (err?.constructor?.name == 'DatabaseError') {
+        console.error('ERROR:', err.message, err.detail);
+        return this.reportError(res, {status: 400, message: 'The provided data does not meet the required criteria'});
+      }
+
       console.error(err);
       return this.reportError(res, {status: 500, message: 'An unexpected error occurred'})
     }

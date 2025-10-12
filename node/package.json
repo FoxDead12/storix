@@ -10,6 +10,7 @@
     "migrate:up": "node --env-file=.env db/migrator/migrator.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "pg": "^8.16.3"
   }
 }
