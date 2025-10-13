@@ -4,7 +4,9 @@ export default class Job {
   constructor (req, res, server) {
     this.req = req;
     this.res = res;
-    this.db = server._pooldb;
+    this.logger = server.logger;
+    this.db = server._pooldb.con;
+    this.redis = server._poolRedis.con;
     this.config = server.config;
   }
 

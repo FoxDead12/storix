@@ -22,12 +22,12 @@ export default class DB {
     await this.pool.connect();
   }
 
-  async query (query, params = []) {
-    return await this.pool.query(query, params);
-  }
-
   freeConn (con) {
     con.release();
+  }
+
+  get con () {
+    return this.pool;
   }
 
 }

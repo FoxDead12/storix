@@ -2,6 +2,8 @@ import http from 'http';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
 import DB from './db.js';
+import REDIS from './redis.js';
+import LOGGER from './logger.js';
 
 export default class HTTP {
 
@@ -19,6 +21,8 @@ export default class HTTP {
     this._config = new CONFIG(namespace);
     this._gatekeeper = new GATEKEEPER(namespace);
     this._pooldb = new DB(namespace);
+    this._poolRedis = new REDIS();
+    this.logger = new LOGGER();
   }
 
   async perform () {
@@ -41,13 +45,16 @@ export default class HTTP {
     } catch (err) {
 
       if (err?.constructor?.name == 'DatabaseError') {
-        console.error('ERROR:', err.message, err.detail);
-        return this.reportError(res, {status: 400, message: 'The provided data does not meet the required criteria'});
+        this.logger.error(err.message);
+        this.logger.error(err.detail);
+        this.reportError(res, {status: 400, message: 'The provided data does not meet the required criteria'});
+      } else {
+        this.logger.error(err);
+        this.reportError(res, {status: 500, message: 'An unexpected error occurred'})
       }
-
-      console.error(err);
-      return this.reportError(res, {status: 500, message: 'An unexpected error occurred'})
     }
+
+    this.logger.info(`${req.method} ${req.url} ${res.statusCode}`);
   }
 
   async _loadNecessaryDependencies () {
@@ -57,6 +64,7 @@ export default class HTTP {
     // ...
     this._gatekeeper.init();
     await this._pooldb.init();
+    await this._poolRedis.init();
   }
 
   reportError (res, {status, message, response}) {

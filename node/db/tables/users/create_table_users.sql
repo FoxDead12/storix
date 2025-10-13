@@ -5,6 +5,7 @@ CREATE TABLE users (
   encrypt_password  VARCHAR(64)   NOT NULL              CHECK (encrypt_password <> ''),
   u_schema          TEXT          NOT NULL,
   deleted           BOOLEAN       NOT NULL      DEFAULT FALSE,
+  active            BOOLEAN       NOT NULL      DEFAULT FALSE,
   create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
   update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP
 );
