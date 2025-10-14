@@ -4,6 +4,7 @@ import GATEKEEPER from './gatekeeper.js';
 import DB from './db.js';
 import REDIS from './redis.js';
 import LOGGER from './logger.js';
+import ROLES from './roles.js';
 
 export default class HTTP {
 
@@ -65,6 +66,11 @@ export default class HTTP {
     this._gatekeeper.init();
     await this._pooldb.init();
     await this._poolRedis.init();
+
+    // ... load possible roles from database ...
+    const roles = await this._pooldb.con.query('SELECT * FROM roles');
+    this.roles = new ROLES(roles.rows);
+
   }
 
   reportError (res, {status, message, response}) {

@@ -1,12 +1,13 @@
 [
   {
     "method": ["POST"],
-    "route": "^/register",
-    "job": "register"
+    "route": "^/login(.+)?",
+    "job": "login"
   },
   {
     "method": ["POST"],
-    "route": "^/login(.+)?",
-    "job": "login"
+    "route": "^/register",
+    "job": "register",
+    "role_mask": "0x08"
   }
 ]

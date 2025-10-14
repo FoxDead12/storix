@@ -20,9 +20,22 @@ export default class CreateUsersTable extends MigrationTransaction {
         u_schema          TEXT          NOT NULL,
         deleted           BOOLEAN       NOT NULL      DEFAULT FALSE,
         active            BOOLEAN       NOT NULL      DEFAULT FALSE,
+        role_mask         BIT(8)        NOT NULL      DEFAULT B'00000000',
         create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
         update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE roles (
+        id                SERIAL        PRIMARY KEY,
+        role              BIT(8)        NOT NULL,
+        name              VARCHAR(255)  NOT NULL
+      );
+
+      INSERT INTO roles (role, name) VALUES
+        (B'00000001', 'READ'),
+        (B'00000010', 'WRITE'),
+        (B'00000100', 'DELETE'),
+        (B'00001000', 'ADMIN');
     `);
 
     // ... create triggers ...
