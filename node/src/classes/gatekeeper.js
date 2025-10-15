@@ -9,7 +9,10 @@ export default class GATEKEEPER {
   init () {
     var content = fs.readFileSync(this.filePath, 'utf8');
     this.gatekeeper = JSON.parse(content);
-    this.gatekeeper.map(route => route['route'] = new RegExp(route['route']));
+    this.gatekeeper.map(route => {
+      route['route'] = new RegExp(route['route']);
+      if (route['role_mask']) route['role_mask'] = parseInt(route['role_mask'], 16);
+    });
   }
 
   checkRoute (method, url) {

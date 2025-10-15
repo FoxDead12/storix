@@ -32,10 +32,8 @@ export default class CreateUsersTable extends MigrationTransaction {
       );
 
       INSERT INTO roles (role, name) VALUES
-        (B'00000001', 'READ'),
-        (B'00000010', 'WRITE'),
-        (B'00000100', 'DELETE'),
-        (B'00001000', 'ADMIN');
+        (B'00000001', 'USER'),
+        (B'00000010', 'ADMIN');
     `);
 
     // ... create triggers ...

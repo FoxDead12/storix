@@ -42,6 +42,30 @@ export default class HTTP {
       if (!routeGatekeeper) {
         return this.reportError(res, {status: 404, message: 'GATEKEEPER_NOT_FOUND'})
       }
+
+      // ... validate user session ...
+      if (routeGatekeeper.role_mask) {
+
+        const session = req?.headers?.authorization;
+        if ( !session ) {
+          this.reportError(res, {status: 403, message: 'Forbidden'});
+        }
+
+        const regex = /^Bearer\s+([A-Za-z0-9]+-[a-fA-F0-9]+)$/;
+        const match = session.match(regex);
+        if ( !match ) {
+          this.reportError(res, {status: 403, message: 'Forbidden invalid session'});
+        }
+
+        const token = match[1];
+        const user = await this._poolRedis.con.hGetAll('user:token:' + token);
+        if ( !user ) {
+          this.reportError(res, {status: 403, message: 'Forbidden invalid session'});
+        }
+
+        return
+      }
+
       await this.handle(req, res, routeGatekeeper);
     } catch (err) {
 

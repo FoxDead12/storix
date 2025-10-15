@@ -8,6 +8,6 @@
     "method": ["POST"],
     "route": "^/register",
     "job": "register",
-    "role_mask": "0x08"
+    "role_mask": "0x01"
   }
 ]

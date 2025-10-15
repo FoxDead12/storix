@@ -64,7 +64,6 @@ export default class Login extends Job {
       login_at: new Date().getTime()
     };
 
-    console.log(redisPayload)
     await this.redis.hSet(redisKey, redisPayload);
     await this.redis.expire(redisKey, 3600); // 1 - HOUR
 
