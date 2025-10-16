@@ -37,8 +37,14 @@ export default class HTTP {
   }
 
   async accept (req, res) {
+
+    let user = null;
+
     try {
+
+      // ... check route in gatekeeper ...
       const routeGatekeeper = this._gatekeeper.checkRoute(req.method, req.url);
+
       if (!routeGatekeeper) {
         return this.reportError(res, {status: 404, message: 'GATEKEEPER_NOT_FOUND'})
       }
@@ -58,7 +64,7 @@ export default class HTTP {
         }
 
         const token = match[1];
-        const user = await this._poolRedis.con.hGetAll('user:token:' + token);
+        user = await this._poolRedis.con.hGetAll('user:token:' + token);
         if ( !user ) {
           return this.reportError(res, {status: 403, message: 'Forbidden invalid session'});
         }
@@ -69,8 +75,11 @@ export default class HTTP {
 
       }
 
-      await this.handle(req, res, routeGatekeeper);
+      // ... execute logic to handle request ...
+      await this.handle(req, res, routeGatekeeper, user);
+
     } catch (err) {
+      console.error(err);
 
       if (err?.constructor?.name == 'DatabaseError') {
         this.logger.error(err.message);

@@ -1,11 +1,13 @@
 export default class ROLES {
 
-  roles = {};
+  _roles = {};
+
+  get roles () {
+    return this._roles;
+  }
 
   constructor (roles) {
-    for (const role of roles) {
-      this.roles[role.name] = parseInt(role.role, 2);
-    }
+    roles.map(role => this._roles[role.name] = parseInt(role.role, 2));
   }
 
   static tranform_byte_to_hex (byte) {

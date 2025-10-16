@@ -8,6 +8,14 @@
     "method": ["POST"],
     "route": "^/register",
     "job": "register",
+    "role_masksssss": "0x02"
+  },
+
+  {
+    "method": ["POST"],
+    "route": "^/folders",
+    "job": "folders-ops",
     "role_mask": "0x01"
   }
+
 ]

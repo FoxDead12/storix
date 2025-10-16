@@ -17,7 +17,7 @@ export default class Register extends Job {
     const encryptPassword = await bcrypt.hash(password, 10);
 
     // ... create user ...
-    const user = await this.db.query('INSERT INTO public.users (name, email, encrypt_password) VALUES ($1, $2, $3) RETURNING id, name, email', [name, email, encryptPassword]);
+    const user = await this.db.query('INSERT INTO public.users (name, email, encrypt_password, role_mask) VALUES ($1, $2, $3, $4::int::bit(8)) RETURNING id, name, email', [name, email, encryptPassword, this.roles['USER']]);
     return this.sendResponse({message: 'User account successfully created', response: user.rows[0]});
 
   }

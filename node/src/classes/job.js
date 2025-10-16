@@ -8,6 +8,7 @@ export default class Job {
     this.db = server._pooldb.con;
     this.redis = server._poolRedis.con;
     this.config = server.config;
+    this.roles = server.roles.roles;
   }
 
   sendResponse ({message, response}) {
@@ -24,13 +25,13 @@ export default class Job {
 
   }
 
-  reportError ({message, response}) {
+  reportError ({message, response, status = 400}) {
 
-    this.res.statusCode = 400;
+    this.res.statusCode = status;
     this.res.setHeader('Content-Type', 'application/json');
 
     const payload = {
-      status: 400,
+      status: status,
       message: message,
       response: response
     };
