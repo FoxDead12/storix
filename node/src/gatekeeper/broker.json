@@ -12,8 +12,8 @@
   },
 
   {
-    "method": ["POST"],
-    "route": "^/folders",
+    "method": ["POST", "PATCH"],
+    "route": "^/folders(.+)?",
     "job": "folders-ops",
     "role_mask": "0x01"
   }
