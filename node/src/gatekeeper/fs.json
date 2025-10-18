@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "method": ["POST"],
+    "route": "^/files(.+)?",
+    "job": "file-ops",
+    "role_mask": "0x01"
+  }
+]

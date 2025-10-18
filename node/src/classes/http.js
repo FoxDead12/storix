@@ -1,10 +1,12 @@
 import http from 'http';
+import https from 'https';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
 import DB from './db.js';
 import REDIS from './redis.js';
 import LOGGER from './logger.js';
 import ROLES from './roles.js';
+import fs from 'fs';
 
 export default class HTTP {
 
@@ -28,7 +30,16 @@ export default class HTTP {
 
   async perform () {
     await this._loadNecessaryDependencies();
-    this._server = http.createServer(this.accept.bind(this));
+
+    if ( this._config.config.https ) {
+      const options = {
+        key: fs.readFileSync(this._config.config.https.private_key),
+        cert: fs.readFileSync(this._config.config.https.certificate)
+      }
+      this._server = https.createServer(options, this.accept.bind(this));
+    } else {
+      this._server = http.createServer(this.accept.bind(this));
+    }
     this._server.listen(this._port, this._host, this.listen.bind(this));
   }
 

@@ -13,7 +13,7 @@ BEGIN
       format            TEXT          NOT NULL,
       size              BIGINT        NOT NULL,
       path              TEXT          NOT NULL,
-      folder_id         INTEGER       NOT NULL     DEFAULT NULL,    -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
+      folder_id         INTEGER       NOT NULL      DEFAULT NULL,    -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
       user_id           INTEGER       NOT NULL      DEFAULT %2$s, -- IN MIGRATION CHANGE TO USER ID
       create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
       update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP

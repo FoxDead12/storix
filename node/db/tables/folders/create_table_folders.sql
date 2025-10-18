@@ -12,7 +12,7 @@ BEGIN
       id                SERIAL        PRIMARY KEY,
       description       TEXT          NOT NULL,
       parent_id         INTEGER                     DEFAULT NULL                REFERENCES %1$I.folders,
-      user_id           INTEGER       NOT NULL      DEFAULT %2$s                REFERENCES public.users, -- IN MIGRATION CHANGE TO USER ID
+      user_id           INTEGER       NOT NULL      DEFAULT %2$s                REFERENCES public.users   CHECK (user_id = %2$s), -- IN MIGRATION CHANGE TO USER ID
       user_defined       BOOLEAN       NOT NULL      DEFAULT TRUE,
       create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
       update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP

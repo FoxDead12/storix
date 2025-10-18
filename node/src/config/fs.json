@@ -1,3 +1,12 @@
 {
-
+  "port": 4001,
+  "host": "localhost",
+  "upload_dir": "",
+  "https": {
+    "private_key": "/Users/dx3/.ssh/storix/key.pem",
+    "certificate": "/Users/dx3/.ssh/storix/cert.pem"
+  },
+  "files_content_allow": [
+    ""
+  ]
 }
