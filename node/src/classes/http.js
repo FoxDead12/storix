@@ -7,6 +7,7 @@ import REDIS from './redis.js';
 import LOGGER from './logger.js';
 import ROLES from './roles.js';
 import fs from 'fs';
+import cookieParser from "cookie-parser";
 
 export default class HTTP {
 
@@ -63,7 +64,7 @@ export default class HTTP {
       // ... validate user session ...
       if (routeGatekeeper.role_mask) {
 
-        const session = req?.headers?.authorization;
+        const session = req?.headers?.authorization || this.parseCookies(req?.headers?.cookie).token;
         if ( !session ) {
           return this.reportError(res, {status: 403, message: 'Forbidden'});
         }
@@ -118,6 +119,19 @@ export default class HTTP {
     const roles = await this._pooldb.con.query('SELECT * FROM roles');
     this.roles = new ROLES(roles.rows);
 
+  }
+
+  parseCookies(cookieHeader) {
+    if (!cookieHeader) return {};
+
+    // Divide cada cookie "chave=valor" e transforma em objeto
+    return Object.fromEntries(
+      cookieHeader.split("; ").map(cookie => {
+        const [name, ...rest] = cookie.split("="); // separa chave e valor
+        const value = rest.join("=");             // caso o valor tenha '='
+        return [name, decodeURIComponent(value)]; // decodifica URI
+      })
+    );
   }
 
   reportError (res, {status, message, response}) {

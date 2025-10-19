@@ -21,12 +21,12 @@ export default class CreateFunctionCreateSchema extends MigrationTransaction {
         $$, _schema);
 
         -- ... Create folders table ...
-        RAISE NOTICE '=====> Running sharded.create_table_files';
-        PERFORM sharded.create_table_files(_user_id, _schema);
-
-        -- ... Create files table ...
         RAISE NOTICE '=====> Running sharded.create_table_folders';
         PERFORM sharded.create_table_folders(_user_id, _schema);
+
+        -- ... Create files table ...
+        RAISE NOTICE '=====> Running sharded.create_table_files';
+        PERFORM sharded.create_table_files(_user_id, _schema);
 
         RETURN;
       END;

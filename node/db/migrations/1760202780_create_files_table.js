@@ -19,11 +19,14 @@ export default class CreateFilesTable extends MigrationTransaction {
         _query := format($$
           CREATE TABLE %1$I.files (
             id                SERIAL        PRIMARY KEY,
-            format            TEXT          NOT NULL,
+            uuid              VARCHAR(36)   NOT NULL,
+            extension         VARCHAR(10)                 DEFAULT NULL,
             size              BIGINT        NOT NULL,
+            birthtime         TIMESTAMP     NOT NULL,
             path              TEXT          NOT NULL,
-            folder_id         INTEGER       NOT NULL      DEFAULT NULL,    -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
-            user_id           INTEGER       NOT NULL      DEFAULT %2$s, -- IN MIGRATION CHANGE TO USER ID
+            description       VARCHAR(255)  NOT NULL,
+            folder_id         INTEGER       NOT NULL      DEFAULT NULL                REFERENCES %1$I.folders,                           -- WILL ALWAYS EXIST A FOLDER WITH THIS ID
+            user_id           INTEGER       NOT NULL      DEFAULT %2$s                REFERENCES public.users   CHECK (user_id = %2$s), -- IN MIGRATION CHANGE TO USER ID
             create_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP,
             update_at         TIMESTAMP                   DEFAULT CURRENT_TIMESTAMP
           );
