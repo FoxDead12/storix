@@ -10,7 +10,12 @@
     "job": "register",
     "role_masksssss": "0x02"
   },
-
+  {
+    "method": ["GET"],
+    "route": "^/session",
+    "job": "session",
+    "role_mask": "0x01"
+  },
   {
     "method": ["GET", "POST", "PATCH", "DELETE"],
     "route": "^/folders(.+)?",

@@ -5,8 +5,10 @@ export class StorixIcon extends LitElement {
 
   static styles = css`
     :host {
-      width: 22px;
-      height: 22px;
+      display: block;
+      width: 24px;
+      height: 24px;
+      color: var(--text-primary);
     }
   `;
 

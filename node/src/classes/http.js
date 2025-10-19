@@ -82,23 +82,23 @@ export default class HTTP {
 
         const session = req?.headers?.authorization || this.parseCookies(req?.headers?.cookie).token;
         if ( !session ) {
-          return this.reportError(res, {status: 403, message: 'Forbidden'});
+          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
         }
 
         const regex = /^Bearer\s+([A-Za-z0-9]+-[a-fA-F0-9]+)$/;
         const match = session.match(regex);
         if ( !match ) {
-          return this.reportError(res, {status: 403, message: 'Forbidden invalid session'});
+          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
         }
 
         const token = match[1];
         user = await this._poolRedis.con.hGetAll('user:token:' + token);
         if ( !user ) {
-          return this.reportError(res, {status: 403, message: 'Forbidden invalid session'});
+          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
         }
 
         if ( !(parseInt(user.role_mask, 16) & routeGatekeeper.role_mask) ) {
-          return this.reportError(res, {status: 403, message: 'Forbidden no permissions'});
+          return this.reportError(res, {status: 403, message: 'BROKER_FORBIDDEN'});
         }
 
       }
