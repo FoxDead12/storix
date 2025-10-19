@@ -14,14 +14,30 @@ export default class FilesOps extends Job {
     exe: 'application/octet-stream',
     zip: 'application/zip',
     doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
     gif: 'image/gif',
     png: 'image/png',
-    jpeg: 'image/jpg',
-    jpg: 'image/jpg',
-    php: 'text/plain'
+    jpeg: 'image/jpeg',
+    jpg: 'image/jpeg',
+    php: 'text/plain',
+    mp4: 'video/mp4',
+    mov: 'video/quicktime',            // usado por iPhone
+    m4v: 'video/x-m4v',                // iOS
+    m4a: 'audio/m4a',                   // áudio iOS
+    aac: 'audio/aac',
+    wav: 'audio/wav',
+    mp3: 'audio/mpeg',
+    bmp: 'image/bmp',
+    tiff: 'image/tiff',
+    ico: 'image/x-icon',
+    heic: 'image/heic',                 // formato iPhone moderno
+    webp: 'image/webp'
   };
+
 
 
   async perform (job) {
@@ -75,26 +91,45 @@ export default class FilesOps extends Job {
         });
       }
 
-      this.res.writeHead(200, {
-        "Content-Disposition": `attachment; filename="${file.description}"`,
-        "Content-Type": FilesOps.mime_types[file.extension] || "application/octet-stream"
+      this.res.setHeader("Content-Disposition", `attachment; filename="${file.description}"`);
+      this.res.setHeader("Content-Type", FilesOps.mime_types[file.extension] || "application/octet-stream");
+
+    } else {
+      this.res.setHeader("Content-Disposition", `inline`);
+      this.res.setHeader("Content-Type", FilesOps.mime_types[file.extension] || "application/octet-stream");
+    }
+
+    const range = this.req.headers.range;
+    if (range) {
+      // TODO: NEED REVIEW THIS CODE
+      this.res.statusCode = 206;
+      const stat = await fs.promises.stat(file_path);
+      const fileSize = stat.size;
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      this.res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+      this.res.setHeader('Accept-Ranges', 'bytes');
+      this.res.setHeader('Content-Length', (end - start) + 1);
+
+      const stream = fs.createReadStream(file_path, {start, end});
+      stream.pipe(this.res);
+
+      stream.on("error", () => {
+        return this.reportError({ message: "Error append reading file"});
       });
 
     } else {
+      this.res.statusCode = 200;
+      // ... send file in chunks ...
+      const stream = fs.createReadStream(file_path);
+      stream.pipe(this.res);
 
-      this.res.writeHead(200, {
-        "Content-Disposition": `inline`
+      stream.on("error", () => {
+        return this.reportError({ message: "Error append reading file"});
       });
-
     }
-
-    // ... send file in chunks ...
-    const stream = fs.createReadStream(file_path);
-    stream.pipe(this.res);
-
-    stream.on("error", () => {
-      return this.reportError({ message: "Error append reading file"});
-    });
 
   }
 
@@ -132,10 +167,6 @@ export default class FilesOps extends Job {
     );
 
     return this.sendResponse({message: 'File upload with success', response: file.rows[0]});
-
-  }
-
-  async delete_file () {
 
   }
 
