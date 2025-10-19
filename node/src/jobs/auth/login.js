@@ -29,7 +29,8 @@ export default class Login extends Job {
     // ... add session to token ...
     await this.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema);
 
-    this.sendResponse({message: 'Authentication was successful', response: token});
+    this.res.setHeader('Set-Cookie', `token=Bearer ${token}`);
+    this.sendResponse({ message: 'Authentication was successful' });
 
   }
 

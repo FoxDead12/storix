@@ -1,4 +1,7 @@
 import { html, css, LitElement } from 'lit';
+import StorixBroker from '../components/storix-broker.js';
+import '../components/storix-toast.js';
+
 import './storix-login.js'
 
 export default class StorixApp extends LitElement {
@@ -13,16 +16,23 @@ export default class StorixApp extends LitElement {
 
   constructor () {
     super();
-
+    this.broker = new StorixBroker();
     window.app = this;
   }
 
   render () {
     return html `
-      <storix-login></storix-login>
+      <storix-toast id="toast" ></storix-toast>
     `
   }
 
+  firstUpdated () {
+    this.toast = this.shadowRoot.getElementById('toast');
+  }
+
+  openToast (payload) {
+    this.toast.openToast(payload);
+  }
 }
 
 window.customElements.define('storix-app', StorixApp);

@@ -1,20 +1,20 @@
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-Regular.ttf') format('ttf'), url('./fonts/Poppins-Regular.ttf') format('ttf');
+  src: url('./public/fonts/Poppins-Regular.ttf') format('ttf'), url('./public/fonts/Poppins-Regular.ttf') format('ttf');
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-Medium.ttf') format('ttf'), url('./fonts/Poppins-Medium.ttf') format('ttf');
+  src: url('./public/fonts/Poppins-Medium.ttf') format('ttf'), url('./public/fonts/Poppins-Medium.ttf') format('ttf');
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('./fonts/Poppins-Bold.ttf') format('ttf'), url('./fonts/Poppins-Bold.ttf') format('ttf');
+  src: url('./public/fonts/Poppins-Bold.ttf') format('ttf'), url('./public/fonts/Poppins-Bold.ttf') format('ttf');
   font-weight: 700;
   font-style: normal;
 }
