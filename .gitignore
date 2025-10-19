@@ -1,2 +1,5 @@
 node/node_modules/
 node/.env
+
+web-ui/node_modules/
+web-ui/env.js
