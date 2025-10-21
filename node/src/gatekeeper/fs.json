@@ -2,7 +2,7 @@
   {
     "method": ["GET", "POST"],
     "route": "^/files(.+)?",
-    "job": "file-ops",
+    "job": "fs-ops",
     "role_mask": "0x01"
   }
 ]

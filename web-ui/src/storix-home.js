@@ -1,4 +1,6 @@
 import { html, LitElement, css } from "lit";
+import '../components/storix-icon.js';
+import './storix-photos.js'
 
 export default class StorixHome extends LitElement {
 
@@ -7,14 +9,73 @@ export default class StorixHome extends LitElement {
       width: 100%;
       overflow: hidden;
     }
+
+    .filter-menus {
+      display: flex;
+      background-color: #fff;
+      margin: 0px;
+      padding: 0 24px;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .filter-menus paper-button {
+      min-width: 150px;
+      text-transform: capitalize;
+      border-radius: 0px;
+      border-bottom: 2px solid transparent;
+      gap: 10px;
+      transition: 300ms ease-in-out all;
+    }
+
+    .filter-menus paper-button[active] {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+      font-weight: bold;
+    }
   `;
+
+  static properties = {
+    menu: {
+      type: String
+    }
+  }
+
+  constructor () {
+    super();
+    this.menu = 'pictures';
+  }
 
   render () {
     return html`
       <div class="container">
-        HOME
+
+        <ul class="filter-menus">
+          <li>
+            <paper-button @click=${this.changeMenu.bind(this)} menu="pictures" ?active=${this.menu === 'pictures' ? true : false}   noink>
+              <storix-icon class="icon-logout" icon="photo" ></storix-icon> Fotos
+            </paper-button>
+          </li>
+          <li>
+            <paper-button @click=${this.changeMenu.bind(this)} menu="directory" ?active=${this.menu === 'directory' ? true : false} noink>Diretórios</paper-button>
+          </li>
+        </ul>
+
+        <div class="page-container">
+          ${this.menu == 'pictures' ? html`
+            <storix-photos></storix-photos>
+            ` : ''}
+        </div>
+
       </div>
     `
+  }
+
+  changeMenu (e) {
+    const menu = e.target.getAttribute('menu');
+    this.menu = menu;
   }
 
 }

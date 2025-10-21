@@ -5,13 +5,21 @@ import '@polymer/paper-button/paper-button.js';
 export default class StorixHeader extends LitElement {
 
   static styles = css`
+    :host {
+      box-shadow:
+        0 1px 1px hsl(0deg 0% 0% / 0.075),
+        0 2px 2px hsl(0deg 0% 0% / 0.075),
+        0 4px 4px hsl(0deg 0% 0% / 0.075),
+        0 8px 8px hsl(0deg 0% 0% / 0.075);
+    }
+
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background-color: var(--primary-color);
       color: #fff;
-      padding: 14px 16px;
+      padding: 12px 24px;
     }
 
     h5 {
@@ -31,6 +39,7 @@ export default class StorixHeader extends LitElement {
       width: 34px;
       height: 34px;
       padding: 0px;
+      margin: 0px;
       border-radius: 50%;
     }
   `;
@@ -40,7 +49,7 @@ export default class StorixHeader extends LitElement {
       <header>
         <h5>Storix</h5>
         <paper-button raised>
-          <storix-icon class="icon-logout" icon="arrow-right-end-on-rectangle" ></storix-icon>
+          <storix-icon class="icon-logout" icon="user-cicle" ></storix-icon>
         </paper-button>
 
       </header>
