@@ -84,8 +84,7 @@ export default class HTTP {
         if ( !session ) {
           return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
         }
-
-        const regex = /^Bearer\s+([A-Za-z0-9]+-[a-fA-F0-9]+)$/;
+        const regex = /^Bearer\s+([A-Za-z0-9]+-[A-Za-z0-9+\/]{86}==)$/;
         const match = session.match(regex);
         if ( !match ) {
           return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});

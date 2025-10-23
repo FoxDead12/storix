@@ -35,13 +35,8 @@ export default class Login extends Job {
   }
 
   async generateToken (user_id) {
-    const date = new Date();
-
-    const hash = crypto.createHash('sha512');
-    hash.update(date.getTime().toString());
-    hash.update(user_id.toString());
-
-    return `${user_id}-${hash.digest('hex')}`;
+    const hash = crypto.randomBytes(64).toString('base64')
+    return `${user_id}-${hash}`;
   }
 
   async addSessionToRedis (user_id, token, name, email, role_mask, schema) {
