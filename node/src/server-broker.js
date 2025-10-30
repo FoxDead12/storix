@@ -1,4 +1,4 @@
-import Broker from "./src/broker/broker.js";
+import Broker from "./broker/broker.js";
 
 const broker = new Broker();
 await broker.perform();

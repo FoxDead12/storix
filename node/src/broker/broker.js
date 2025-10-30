@@ -46,15 +46,10 @@ export default class Broker extends HTTP {
   async parseBody (req) {
     return await new Promise((res, rej) => {
       const body = [];
-      req.on('data', chunk => {
-        body.push(chunk);
-      })
-      .on('end', () => {
-        res(Buffer.concat(body).toString());
-      })
-      .on('error', err => {
-        rej(err);
-      })
+      req
+        .on('data', chunk => body.push(chunk))
+        .on('end', () => res(Buffer.concat(body).toString()))
+        .on('error', err => rej(err))
     });
   }
 

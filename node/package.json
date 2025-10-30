@@ -6,8 +6,8 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "broker": "node --env-file=.env server-broker.js",
-    "fs": "node --env-file=.env server-fs.js",
+    "broker": "node --env-file=.env src/server-broker.js",
+    "fs": "node --env-file=.env src/server-fs.js",
     "migrate:up": "node --env-file=.env db/migrator/migrator.js"
   },
   "dependencies": {

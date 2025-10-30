@@ -1,5 +1,4 @@
 import http from 'http';
-import https from 'https';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
 import DB from './db.js';
@@ -31,48 +30,20 @@ export default class HTTP {
 
   async perform () {
     await this._loadNecessaryDependencies();
-
-    if ( this._config.config.https ) {
-      const options = {
-        key: fs.readFileSync(this._config.config.https.private_key),
-        cert: fs.readFileSync(this._config.config.https.certificate)
-      }
-      this._server = https.createServer(options, this.accept.bind(this));
-    } else {
-      this._server = http.createServer(this.accept.bind(this));
-    }
+    this._server = http.createServer(this.accept.bind(this));
     this._server.listen(this._port, this._host, this.listen.bind(this));
   }
 
   listen () {
-    if ( this._config.config.https ) {
-      console.log(`Server running at https://${this._host}:${this._port}`);
-    } else {
-      console.log(`Server running at http://${this._host}:${this._port}`);
-    }
+    console.log(`Server running at http://${this._host}:${this._port}`);
   }
 
   async accept (req, res) {
-
-    res.setHeader('Access-Control-Allow-Origin', `${req.headers.origin}`); // ou use o domínio específico
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    if (req.method == 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      this.logger.info(`${req.method} ${req.url} ${res.statusCode}`);
-      return;
-    }
-
     let user = null;
-
     try {
 
       // ... check route in gatekeeper ...
       const routeGatekeeper = this._gatekeeper.checkRoute(req.method, req.url);
-
       if (!routeGatekeeper) {
         return this.reportError(res, {status: 404, message: 'GATEKEEPER_NOT_FOUND'})
       }

@@ -1,6 +1,10 @@
 
 export default class StorixBroker {
 
+  constructor () {
+    this.url = new URL('api', window.origin);
+  }
+
   async get (url) {
     return await this._fetch('GET', url);
   }
@@ -19,7 +23,9 @@ export default class StorixBroker {
 
   async _fetch (method, url, payload = null) {
 
-    const path = new URL(url, window.BROKER_URL);
+    const path = new URL(url, this.url.href);
+    console.log(path);
+
     const response = await fetch(path, {
       method: method,
       headers: {
