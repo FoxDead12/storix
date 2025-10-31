@@ -48,7 +48,7 @@ export default class StorixApp extends LitElement {
       const data = await this.broker.get('session');
       this.session.user = data.response;
     } catch (e) {
-      window.location.href = '/login.html';
+      window.location.href = '/login';
     }
   }
 

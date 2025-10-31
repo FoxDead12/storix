@@ -1,12 +1,5 @@
 {
-  "port": 4001,
+  "port": 5002,
   "host": "localhost",
-  "upload_dir": "/Users/dx3/Developer/storix-uploads",
-  "https": {
-    "private_key": "/home/david-xavier/.ssh/storix/key.pem",
-    "certificate": "/home/david-xavier/.ssh/storix/cert.pem"
-  },
-  "files_content_allow": [
-    ""
-  ]
+  "upload_dir": "/Users/dx3/Developer/storix-uploads"
 }
