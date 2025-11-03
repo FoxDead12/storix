@@ -2,11 +2,12 @@ import { html, css, LitElement } from 'lit';
 import StorixBroker from '../components/storix-broker.js';
 import '../components/storix-toast.js';
 import './storix-header.js'
-import './storix-home.js';
+import './storix-photos.js';
+import '../components/storix-dialog/storix-dialog.js'
 
 export default class StorixApp extends LitElement {
 
-  static styles = css `
+  static styles = css`
     :host {
       display: flex;
       flex-direction: column;
@@ -17,9 +18,9 @@ export default class StorixApp extends LitElement {
 
   constructor () {
     super();
-    window.app = this;
-    this.session = {};
-    this.broker = new StorixBroker();
+    window.app   = this;
+    this.broker  = new StorixBroker();
+    this.session = new Object();
   }
 
   async connectedCallback () {
@@ -30,13 +31,14 @@ export default class StorixApp extends LitElement {
   render () {
     return html `
       <storix-header></storix-header>
-      <storix-home></storix-home>
+      <storix-photos></storix-photos>
       <storix-toast id="toast" ></storix-toast>
     `
   }
 
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
+    this.openDialog();
   }
 
   // ********************************************* //
@@ -46,19 +48,27 @@ export default class StorixApp extends LitElement {
   async _fetchUserSession () {
     try {
       const data = await this.broker.get('session');
-      this.session.user = data.response;
+      this.session.user_id    = data.response.id;
+      this.session.user_name  = data.response.name;
+      this.session.user_email = data.response.email;
     } catch (e) {
       window.location.href = '/login';
     }
   }
 
   // ********************************************* //
-  // GET methods                                   //
+  // app methods                                   //
   // ********************************************* //
 
   openToast (payload) {
     this.toast.openToast(payload);
   }
+
+  openDialog (dialog) {
+    const component = document.createElement('storix-dialog');
+    document.body.append(component);
+  }
+
 }
 
 window.customElements.define('storix-app', StorixApp);

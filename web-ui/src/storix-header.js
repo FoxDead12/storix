@@ -32,28 +32,59 @@ export default class StorixHeader extends LitElement {
       letter-spacing: 1px;
     }
 
+    ul {
+      padding: 0px;
+      margin: 0px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
     paper-button {
-      background-color: #fff;
-      color: var(--primary-color);
       min-width: 0 !important;
-      width: 34px;
-      height: 34px;
       padding: 0px;
       margin: 0px;
       border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      width: 24px;
+      height: 24px;
+    }
+
+    .user-icon {
+      width: 34px;
+      height: 34px;
+      background-color: #fff;
+      color: var(--primary-color);
+    }
+
+    storix-icon {
+      width: 24px;
+      height: 24px;
     }
   `;
 
   render () {
     return html`
       <header>
+
         <h5>Storix</h5>
-        <paper-button raised>
-          <storix-icon class="icon-logout" icon="user-cicle" ></storix-icon>
-        </paper-button>
+
+        <ul>
+          <paper-button>
+            <storix-icon icon="plus" ></storix-icon>
+          </paper-button>
+
+          <paper-button class="user-icon">
+            <storix-icon icon="user-cicle" ></storix-icon>
+          </paper-button>
+        </ul>
 
       </header>
     `;
+  }
+
+  _openUploadFiles () {
+
   }
 
 }

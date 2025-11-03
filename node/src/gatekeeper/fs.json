@@ -1,7 +1,13 @@
 [
   {
-    "method": ["GET", "POST"],
+    "method": ["GET"],
     "route": "^/files(.+)?",
+    "job": "fs-ops",
+    "role_mask": "0x01"
+  },
+  {
+    "method": ["POST"],
+    "route": "^/upload(.+)?",
     "job": "fs-ops",
     "role_mask": "0x01"
   }

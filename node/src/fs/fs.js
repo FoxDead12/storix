@@ -7,31 +7,36 @@ export default class FS extends HTTP {
     super('fs');
   }
 
-  async handle (req, res, routeGatekeeper, user) {
+  async handler ( client ) {
 
-    // ... get job key from gatekeeper ...
-    const jobKey = routeGatekeeper.job;
-    if (!jobKey) {
-      return this.reportError(res, {status: 500, message: 'GATEKEEPER_JOB_NOT_DEFINE'});
+    const {req, res, route, session } = client;
+
+    // ... get job name from gatekeeper ...
+    if ( !route.job ) {
+      throw new HTTPError("Gatekeeper don't define job", 400);
     }
 
-    // ... get job class from jobs array ...
-    const jobClass = jobs[jobKey];
-    if (!jobClass) {
-      return this.reportError(res, {status: 500, message: 'JOB_NOT_EXIST'});
+    // ... get class name of job ...
+    const job_instance_name = jobs[route.job];
+    if ( !job_instance_name ) {
+      throw new HTTPError("Job defined don't exist", 400);
     }
 
-    const jobPayload = {};
+    const job   = new Object();
+    job.body    = new Object();
+    job.params  = new Object();
 
-    if ( user ) {
-      jobPayload.user_id = user.id;
-      jobPayload.user_schema = user.schema;
+    if ( session ) {
+      job.user_id     = session.id;
+      job.user_schema = session.schema;
     }
 
-    jobPayload.params = Object.fromEntries(new URL(req.url, `http://${req.headers.host}`).searchParams.entries());
+    const url = new URL(req.url, `http://localhost/`);
+    if ( url.searchParams.size > 0 ) {
+      job.params = Object.fromEntries(url.searchParams.entries());
+    }
 
-    const job = new jobClass(req, res, this);
-    await job.perform(jobPayload);
+    await (new job_instance_name(req, res, this)).perform(job);
 
   }
 

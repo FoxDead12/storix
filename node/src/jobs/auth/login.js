@@ -6,7 +6,6 @@ import ROLES from "../../classes/roles.js";
 export default class Login extends Job {
 
   async perform (job) {
-
     const { email, password } = job.body;
 
     // ... get user from email ...
@@ -29,7 +28,7 @@ export default class Login extends Job {
     // ... add session to token ...
     await this.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema);
 
-    this.res.setHeader('Set-Cookie', `token=Bearer ${token}`);
+    this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`);
     this.sendResponse({ message: 'Authentication was successful' });
 
   }

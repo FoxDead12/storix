@@ -1,138 +1,148 @@
 import http from 'http';
+import LOGGER from './logger.js';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
-import DB from './db.js';
-import REDIS from './redis.js';
-import LOGGER from './logger.js';
 import ROLES from './roles.js';
-import fs from 'fs';
-import cookieParser from "cookie-parser";
+import REDIS from './redis.js';
+import DB from './db.js';
+import HTTPError from './http-error.js';
+import HELPER from './helper.js';
+
+// ... create logger to server ...
+global.logger = new LOGGER();
 
 export default class HTTP {
 
-  // ... server props ...
-  _port = null;
-  _host = null;
-  _server = null;
-
-  // ... server dependences ...
-  _config = null;
-  _gatekeeper = null;
-  _pooldb = null;
-
   constructor (namespace) {
-    this._config = new CONFIG(namespace);
-    this._gatekeeper = new GATEKEEPER(namespace);
-    this._pooldb = new DB(namespace);
-    this._poolRedis = new REDIS();
-    this.logger = new LOGGER();
-  }
-
-  async perform () {
-    await this._loadNecessaryDependencies();
-    this._server = http.createServer(this.accept.bind(this));
-    this._server.listen(this._port, this._host, this.listen.bind(this));
+    // ... variables of class ...
+    this.namespace  = namespace;
+    this.gatekeeper = new Array();
+    this.config      = new Object();
+    this.redis      = new Object();
+    this.db         = new Object();
+    this.roles      = new Object();
+    this.server     = new Object();
   }
 
   listen () {
-    console.log(`Server running at http://${this._host}:${this._port}`);
+    global.logger.info(`Server running at http://${this.config.host}:${this.config.port}`);
+  }
+
+  async perform () {
+    await this.beforeStart();
+    await this.start();
+  }
+
+  async beforeStart () {
+
+    // ... load configuration of server ...
+    this.config = new CONFIG(this.namespace).init();
+
+    // ... load array of gatekeeper of server ...
+    this.gatekeeper = new GATEKEEPER(this.namespace);
+    this.gatekeeper.init();
+
+    // ... create redis connections ...
+    this.redis = await (new REDIS()).init();
+
+    // ... create postgres connections
+    this.db = await (new DB(this.namespace)).init();
+
+    // ... load roles from postgres ...
+    const _roles = await this.db.query('SELECT * FROM roles');
+    this.roles = new ROLES(_roles.rows);
+
+  }
+
+  async start () {
+    this.server = http.createServer(this.accept.bind(this));
+    this.server.listen(this.config.port, this.config.host, this.listen.bind(this));
   }
 
   async accept (req, res) {
-    let user = null;
+
+    // ... object to send to children ...
+    const client = { req, res, route: null, session: null };
+
     try {
 
-      // ... check route in gatekeeper ...
-      const routeGatekeeper = this._gatekeeper.checkRoute(req.method, req.url);
-      if (!routeGatekeeper) {
-        return this.reportError(res, {status: 404, message: 'GATEKEEPER_NOT_FOUND'})
+      // ... check route is valid from gatekeeper ...
+      client.route = this.gatekeeper.checkRoute(req.method, req.url);
+      if ( !client.route ) {
+        throw new HTTPError('Not found', 404);
       }
 
-      // ... validate user session ...
-      if (routeGatekeeper.role_mask) {
-
-        const session = req?.headers?.authorization || this.parseCookies(req?.headers?.cookie).token;
-        if ( !session ) {
-          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
-        }
-        const regex = /^Bearer\s+([A-Za-z0-9]+-[A-Za-z0-9+\/]{86}==)$/;
-        const match = session.match(regex);
-        if ( !match ) {
-          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
-        }
-
-        const token = match[1];
-        user = await this._poolRedis.con.hGetAll('user:token:' + token);
-        if ( !user ) {
-          return this.reportError(res, {status: 401, message: 'BROKER_UNAUTHORIZED'});
-        }
-
-        if ( !(parseInt(user.role_mask, 16) & routeGatekeeper.role_mask) ) {
-          return this.reportError(res, {status: 403, message: 'BROKER_FORBIDDEN'});
-        }
-
+      // ... check session from client request ...
+      if ( client.route.role_mask ) {
+        client.session = await this.check_session(req, client.route.role_mask);
       }
 
-      // ... execute logic to handle request ...
-      await this.handle(req, res, routeGatekeeper, user);
+      // ... execute logic of server (broker or fs) ...
+      await this.handler(client);
 
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
 
-      if (err?.constructor?.name == 'DatabaseError') {
-        this.logger.error(err.message);
-        this.logger.error(err.detail);
-        this.reportError(res, {status: 400, message: 'The provided data does not meet the required criteria'});
+      if ( e instanceof HTTPError ) {
+        HELPER.reportError({ res: res, status: e.status, message: e.message });
       } else {
-        this.logger.error(err);
-        this.reportError(res, {status: 500, message: 'An unexpected error occurred'})
+        console.error(e);
+        HELPER.reportError({ res: res, status: 500, message: 'Internal Server Error' });
       }
+
     }
 
-    this.logger.info(`${req.method} ${req.url} ${res.statusCode}`);
-  }
-
-  async _loadNecessaryDependencies () {
-    this._config.init();
-    this._port = this._config.port;
-    this._host = this._config.host;
-    // ...
-    this._gatekeeper.init();
-    await this._pooldb.init();
-    await this._poolRedis.init();
-
-    // ... load possible roles from database ...
-    const roles = await this._pooldb.con.query('SELECT * FROM roles');
-    this.roles = new ROLES(roles.rows);
+    global.logger.info(`${req.method} ${req.url} ${res.statusCode}`);
 
   }
 
-  parseCookies(cookieHeader) {
-    if (!cookieHeader) return {};
+  async check_session (req, route_mask) {
 
-    // Divide cada cookie "chave=valor" e transforma em objeto
-    return Object.fromEntries(
-      cookieHeader.split("; ").map(cookie => {
-        const [name, ...rest] = cookie.split("="); // separa chave e valor
-        const value = rest.join("=");             // caso o valor tenha '='
-        return [name, decodeURIComponent(value)]; // decodifica URI
-      })
-    );
-  }
+    let token = null;
 
-  reportError (res, {status, message, response}) {
-    res.statusCode = status;
-    res.setHeader('Content-Type', 'application/json');
-    const payload = {
-      status: status,
-      message: message,
-      response: response
-    };
-    res.end(JSON.stringify(payload));
-  }
+    // ... token comming in autorizathion header ...
+    if ( req?.headers?.authorization ) {
 
-  get config () {
-    return this._config.config;
+      const regex_auth = /^Bearer\s+([A-Za-z0-9]+-[A-Za-z0-9+\/]{86}==)$/;
+      const match = req.headers.authorization.match(regex_auth);
+      if ( match ) {
+        token = match[1];
+      } else {
+        throw new HTTPError('Unauthorized', 401);
+      }
+
+    // ... token comming in cookies header ...
+    } else if ( req?.headers?.cookie ) {
+
+      const cookies = HELPER.parseCookies(req.headers.cookie);
+      const regex_cookie = /^([A-Za-z0-9]+-[A-Za-z0-9+\/]{86}==)$/;
+      if ( cookies?.token ) {
+        const match = cookies.token.match(regex_cookie);
+        if ( match ) {
+          token = match[1];
+        } else {
+          throw new HTTPError('Unauthorized', 401);
+        }
+      } else {
+        throw new HTTPError('Unauthorized', 401);
+      }
+
+    } else  {
+      throw new HTTPError('Unauthorized', 401);
+    }
+
+    // ... get session object from redis ...
+    const session_obj = await this.redis.hGetAll(`user:token:${token}`);
+    if ( !session_obj || Object.keys(session_obj).length == 0 ) {
+      throw new HTTPError('Unauthorized', 401);
+    }
+
+    // ... check role mask from user and route ...
+    const role_mask = parseInt(session_obj.role_mask, 16);
+    if ( !(role_mask & route_mask) ) {
+      throw new HTTPError('Forbidden', 403);
+    }
+
+    return session_obj;
   }
 
 }

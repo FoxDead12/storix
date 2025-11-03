@@ -6,7 +6,8 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "start": "web-dev-server --node-resolve --open --watch"
+    "start": "web-dev-server --node-resolve --open --watch",
+    "build": "rollup -c"
   },
   "dependencies": {
     "@polymer/paper-button": "^3.0.1",
@@ -14,6 +15,13 @@
     "lit": "^3.3.1"
   },
   "devDependencies": {
-    "@web/dev-server": "^0.4.6"
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@web/dev-server": "^0.4.6",
+    "glob": "^11.0.3",
+    "rollup": "^4.52.5",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-html": "^0.2.1"
   }
 }

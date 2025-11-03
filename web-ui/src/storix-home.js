@@ -51,24 +51,24 @@ export default class StorixHome extends LitElement {
   render () {
     return html`
       <div class="container">
-
         <ul class="filter-menus">
           <li>
-            <paper-button @click=${this.changeMenu.bind(this)} menu="photos" ?active=${this.menu === 'photos' ? true : false}   noink>
-              <storix-icon class="icon-logout" icon="photo" ></storix-icon> Fotos
+            <paper-button @click=${this.changeMenu.bind(this)} menu="photos" ?active=${this.menu === 'photos' ? true : false} noink>
+              <storix-icon icon="photo" ></storix-icon>
+              Fotos
             </paper-button>
           </li>
           <li>
-            <paper-button @click=${this.changeMenu.bind(this)} menu="files" ?active=${this.menu === 'files' ? true : false} noink>Diretórios</paper-button>
+            <paper-button @click=${this.changeMenu.bind(this)} menu="files" ?active=${this.menu === 'files' ? true : false} noink>
+              <storix-icon icon="folder-open" ></storix-icon>
+              Diretórios
+            </paper-button>
           </li>
         </ul>
 
         <div class="page-container">
-          ${this.menu == 'photos' ? html`
-            <storix-photos></storix-photos>
-            ` : ''}
+          ${this.menu == 'photos' ? html`<storix-photos></storix-photos>` : ''}
         </div>
-
       </div>
     `
   }

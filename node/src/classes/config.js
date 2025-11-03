@@ -8,16 +8,9 @@ export default class CONFIG {
   }
 
   init () {
+    global.logger.info('Loading config');
     var content = fs.readFileSync(this.filePath, 'utf8');
-    this.config = JSON.parse(content);
-  }
-
-  get port () {
-    return this.config['port'];
-  }
-
-  get host () {
-    return this.config['host'];
+    return JSON.parse(content);
   }
 
 }
