@@ -33,6 +33,8 @@ export default class StorixApp extends LitElement {
       <storix-header></storix-header>
       <storix-photos></storix-photos>
       <storix-toast id="toast" ></storix-toast>
+
+      <storix-dialog></storix-dialog>
     `
   }
 
@@ -65,8 +67,8 @@ export default class StorixApp extends LitElement {
   }
 
   openDialog (dialog) {
-    const component = document.createElement('storix-dialog');
-    document.body.append(component);
+    // const component = document.createElement('storix-dialog');
+    // document.body.append(component);
   }
 
 }

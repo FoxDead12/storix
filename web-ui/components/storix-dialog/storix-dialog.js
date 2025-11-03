@@ -1,4 +1,5 @@
 import { html, LitElement, css } from "lit";
+import '../storix-icon.js';
 
 export default class StorixDialog extends LitElement {
 
@@ -12,7 +13,8 @@ export default class StorixDialog extends LitElement {
     }
 
     dialog {
-      padding: 0px;
+      width: 450px;
+      padding: 12px 16px;
       border: none;
       border-radius: 8px;
       top: 0px;
@@ -27,15 +29,40 @@ export default class StorixDialog extends LitElement {
       display: flex;
       flex-direction: column;
     }
+
+    .header {
+      padding: 0px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header > h1 {
+      padding: 0px;
+      margin: 0px;
+      font-weight: normal;
+      font-size: 16px;
+    }
   `;
 
   render () {
     return html`
       <dialog id="dialog">
-        <p>Greetings, one and all!</p>
-        <form method="dialog">
-          <button>OK</button>
-        </form>
+
+        <ol class="header">
+          <h1>Title</h1>
+          <storix-icon icon="plus" ></storix-icon>
+        </ol>
+
+
+        <div></div>
+
+
+        <div class="footer">
+
+        </div>
+
       </dialog>
     `;
   }
