@@ -1,5 +1,6 @@
-import { html, LitElement, css } from "lit";
+import { html, LitElement, css, render } from "lit";
 import '../storix-icon.js';
+import '@polymer/paper-button/paper-button.js';
 
 export default class StorixDialog extends LitElement {
 
@@ -13,8 +14,7 @@ export default class StorixDialog extends LitElement {
     }
 
     dialog {
-      width: 450px;
-      padding: 12px 16px;
+      padding: 0px;
       border: none;
       border-radius: 8px;
       top: 0px;
@@ -31,45 +31,182 @@ export default class StorixDialog extends LitElement {
     }
 
     .header {
-      padding: 0px;
+      padding: 12px 16px;
       margin: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background-color: var(--primary-color);
+    }
+
+    .pages-container {
+      padding: 12px 16px;
+      margin: 0;
+      width: 700px;
+      aspect-ratio: 16/9;
+      display: flex;
+    }
+
+    .page-container {
+      overflow: hidden;
+      flex: none;
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .footer {
+      padding: 12px 16px;
+      box-shadow: rgba(149, 157, 165, 0.2) 0px -8px 24px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     .header > h1 {
       padding: 0px;
       margin: 0px;
-      font-weight: normal;
-      font-size: 16px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #fff;
+      letter-spacing: 1px;
     }
+
+    .header > paper-button {
+      min-width: 0 !important;
+      padding: 0px;
+      margin: 0px;
+      border-radius: 50%;
+      aspect-ratio: 1 / 1;
+      width: 32px;
+      height: 32px;
+    }
+
+    .header > paper-button > storix-icon {
+      width: 32px;
+      height: 32px;
+      color: #fff;
+    }
+
+    .footer > .button-next {
+      min-width: 24px !important;
+      margin: 0px;
+      background-color: var(--primary-color);
+      color: #fff;
+      border-radius: 5px;
+    }
+
   `;
+
+  static properties = {
+    options: {
+      typeof: Object
+    },
+    _pages: {
+      typeof: Array
+    },
+    _currentPageFocus: {
+      typeof: String
+    },
+    title: {
+      typeof: String
+    }
+  }
 
   render () {
     return html`
       <dialog id="dialog">
 
         <ol class="header">
-          <h1>Title</h1>
-          <storix-icon icon="plus" ></storix-icon>
+          <h1>${this.title}</h1>
+          <paper-button>
+            <storix-icon icon="x-circle"></storix-icon>
+          </paper-button>
         </ol>
 
-
-        <div></div>
-
+        <div class="pages-container" id="pages-container">
+        </div>
 
         <div class="footer">
-
+          <paper-button raised class="button-next" id="button-next"></paper-button>
         </div>
 
       </dialog>
     `;
   }
 
+  updated (propsChanges) {
+
+    if ( propsChanges.has('_currentPageFocus') ) {
+      this._focusPage(this._currentPageFocus);
+    }
+
+  }
+
   firstUpdated () {
+    // ... get from dom necessary elements ...
     this.dialog = this.shadowRoot.getElementById('dialog');
+    this.pagesContainers = this.shadowRoot.getElementById('pages-container');
+    this.nextButton = this.shadowRoot.getElementById('button-next');
+
+    // ... parse options to props ...
+    if ( this.options ) {
+      this.title  = this.options?.title;
+      this._pages = this.options?.pages;
+    }
+
+    // ... prepare to show modal ...
     this.dialog.showModal();
+    this._preloadPages();
+    this.changeNextButtonToIcon('rocket-launch');
+  }
+
+  _preloadPages () {
+
+    for ( const pageName of this._pages ) {
+      const container = document.createElement('div');
+      const page = document.createElement(pageName);
+
+      container.className = 'page-container';
+      page.dialog = this;
+
+      container.append(page);
+      this.pagesContainers.append(container);
+    }
+
+    this._currentPageFocus = this._pages[0];
+  }
+
+  async _focusPage (page) {
+    await app.importModule(`./${page}.js`);
+    const elementPage = this.shadowRoot.querySelector(page);
+    elementPage.scrollTo();
+    elementPage.enter();
+  }
+
+  // -------------------------------------------------------------------- //
+  // BUTTONS CONTROLLER/RENDER METHODS
+  // -------------------------------------------------------------------- //
+  changeNextButtonToIcon (icon) {
+    this._renderNextButton({mode: 'icon', icon});
+  }
+
+  changeNextButtonToText (text) {
+    this._renderNextButton({mode: 'text', text});
+  }
+
+  _renderNextButton ({mode, text, icon}) {
+    const element = this.nextButton;
+
+    if ( mode === 'text' ) {
+      render(html`<span>${text}</span>`, element);
+    } else if ( mode === 'icon' ) {
+      render(html`<storix-icon icon="${icon}"></storix-icon>`, element);
+    }
+
+  }
+
+  _renderPreviousButton () {
+
   }
 
 }

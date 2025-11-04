@@ -10,6 +10,10 @@ export class StorixIcon extends LitElement {
       height: 24px;
       color: var(--text-primary);
     }
+
+    svg {
+      stroke-width: var(--icon-stroke-width, 1.5);
+    }
   `;
 
   static properties = {

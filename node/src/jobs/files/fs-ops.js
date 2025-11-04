@@ -227,6 +227,8 @@ export default class FsOps extends Job {
       return this.reportError({status: 400, message: "Is necessary indicate the file name"});
     }
 
+    // ... TODO, CHECK IF DIRECTORY EXIST ...
+
     // ... generate uuid and path to file ...
     const uuid = crypto.randomUUID();
     const file_relative = path.join(this.job.user_schema, uuid);

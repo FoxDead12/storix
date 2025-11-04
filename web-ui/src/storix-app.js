@@ -33,14 +33,15 @@ export default class StorixApp extends LitElement {
       <storix-header></storix-header>
       <storix-photos></storix-photos>
       <storix-toast id="toast" ></storix-toast>
-
-      <storix-dialog></storix-dialog>
     `
   }
 
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
-    this.openDialog();
+    this.openDialog({
+      title: 'Upload your files',
+      pages: ['storix-upload-files']
+    });
   }
 
   // ********************************************* //
@@ -61,14 +62,18 @@ export default class StorixApp extends LitElement {
   // ********************************************* //
   // app methods                                   //
   // ********************************************* //
+  async importModule (src) {
+    await import(src);
+  }
 
   openToast (payload) {
     this.toast.openToast(payload);
   }
 
   openDialog (dialog) {
-    // const component = document.createElement('storix-dialog');
-    // document.body.append(component);
+    const component = document.createElement('storix-dialog');
+    component.options = dialog;
+    document.body.append(component);
   }
 
 }
