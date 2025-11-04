@@ -1,5 +1,9 @@
 node/node_modules/
 node/.env
+node/src/config/broker.json
+node/src/config/fs.json
+
 
 web-ui/node_modules/
 web-ui/env.js
+web-ui/dist
