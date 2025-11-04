@@ -107,6 +107,9 @@ export default class StorixDialog extends LitElement {
     _currentPageFocus: {
       typeof: String
     },
+    mode: {
+      typeof: String
+    },
     title: {
       typeof: String
     }
@@ -119,16 +122,21 @@ export default class StorixDialog extends LitElement {
         <ol class="header">
           <h1>${this.title}</h1>
           <paper-button>
-            <storix-icon icon="x-circle"></storix-icon>
+            <storix-icon icon="x-circle" @click=${this.close.bind(this)}></storix-icon>
           </paper-button>
         </ol>
 
         <div class="pages-container" id="pages-container">
         </div>
 
-        <div class="footer">
-          <paper-button raised class="button-next" id="button-next"></paper-button>
-        </div>
+        ${ this.mode !== 'no-footer'
+          ? html`
+            <div class="footer">
+              <paper-button raised class="button-next" id="button-next" @click=${this.nextClick.bind(this)}></paper-button>
+            </div>
+          `
+          : ''
+        }
 
       </dialog>
     `;
@@ -151,6 +159,7 @@ export default class StorixDialog extends LitElement {
     // ... parse options to props ...
     if ( this.options ) {
       this.title  = this.options?.title;
+      this.mode   = this.options?.mode;
       this._pages = this.options?.pages;
     }
 
@@ -181,6 +190,20 @@ export default class StorixDialog extends LitElement {
     const elementPage = this.shadowRoot.querySelector(page);
     elementPage.scrollTo();
     elementPage.enter();
+  }
+
+  close () {
+    this.remove();
+  }
+
+  async nextClick (e) {
+
+    for ( const pageName of this._pages ) {
+      const page = this.shadowRoot.querySelector(pageName);
+      await page.save();
+    }
+
+
   }
 
   // -------------------------------------------------------------------- //

@@ -9,6 +9,7 @@ export default class StorixDialogPage extends LitElement {
   }
 
   enter () {}
+  save () {}
 
 }
 

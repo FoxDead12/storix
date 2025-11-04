@@ -38,10 +38,6 @@ export default class StorixApp extends LitElement {
 
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
-    this.openDialog({
-      title: 'Upload your files',
-      pages: ['storix-upload-files']
-    });
   }
 
   // ********************************************* //

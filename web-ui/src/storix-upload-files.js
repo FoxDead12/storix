@@ -13,10 +13,11 @@ export default class StorixUploadFiles extends StorixDialogPage {
     :host {
       width: 100%;
       height: 100%;
-      max-height: 500px;
+      display: flex;
     }
 
     .dropzone {
+      width: 100%;
       border: 2px dashed #ccc;
       display: flex;
       flex-direction: column;
@@ -68,6 +69,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
       margin: 0px;
       padding: 0px;
       width: 100%;
+      height: 100%;
       list-style: none;
       display: flex;
       flex-wrap: wrap;
@@ -122,7 +124,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
 
   render() {
     return html`
-      <div id="dropzone" class="dropzone" @dragover=${this._dropzoneDragOver.bind(this)} @dragleave=${this._dropzoneDragLeave.bind(this)} @drop=${this._dropzoneDragDrop.bind(this)}>
+      <div id="dropzone" class="dropzone" @dragover=${this._dropzoneDragOver.bind(this)} @dragleave=${this._dropzoneDragLeave.bind(this)} @drop=${this._dropzoneDragDrop.bind(this)} style="max-height: ${this.clientHeight}px;">
 
         ${ this.files.length === 0
           ? html`
@@ -132,7 +134,9 @@ export default class StorixUploadFiles extends StorixDialogPage {
             <p>or</p>
           `
           : html`
-            <ul class="files-list"> ${repeat(this.files, (file) => file.id, this.renderFile.bind(this))}</ul>
+            <ul class="files-list" id="files-list" >
+              ${repeat(this.files, (file) => file.id, this.renderFile.bind(this))}
+            </ul>
           `
         }
 
@@ -143,12 +147,16 @@ export default class StorixUploadFiles extends StorixDialogPage {
   }
 
   firstUpdated () {
-    this.dropzone = this.shadowRoot.getElementById('dropzone');
+    this.dropzone  = this.shadowRoot.getElementById('dropzone');
     this.inputFile = this.shadowRoot.getElementById('file');
   }
 
   enter () {
     this.dialog.changeNextButtonToText('Close');
+  }
+
+  save () {
+    this.dialog.close();
   }
 
   _dropzoneDragOver (e) {

@@ -71,7 +71,7 @@ export default class StorixHeader extends LitElement {
 
         <ul>
           <paper-button>
-            <storix-icon icon="plus" ></storix-icon>
+            <storix-icon icon="plus" @click=${this._openWizardUpload.bind(this)}></storix-icon>
           </paper-button>
 
           <paper-button class="user-icon">
@@ -83,8 +83,12 @@ export default class StorixHeader extends LitElement {
     `;
   }
 
-  _openUploadFiles () {
-
+  _openWizardUpload () {
+    app.openDialog({
+      mode: 'no-footer',
+      title: 'Upload your files',
+      pages: ['storix-upload-files']
+    });
   }
 
 }
