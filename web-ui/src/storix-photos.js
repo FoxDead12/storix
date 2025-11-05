@@ -6,22 +6,39 @@ export default class StorixPhotos extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
-      height: 100%;
     }
 
     ul {
-      height: 100%;
+      list-style: none;
       padding: 12px 16px;
       margin: 0px;
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
+      gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(24, 1fr);
+      grid-auto-rows: 1fr;
+      grid-auto-flow: dense;
       overflow-y: auto;
+      height: 100%;
     }
 
     ul > li {
+      grid-column: span 8;
+      grid-row: span 24;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
       background-color: #ccc;
+      box-shadow:
+      0 1px 1px hsl(0deg 0% 0% / 0.075),
+      0 2px 2px hsl(0deg 0% 0% / 0.075),
+      0 4px 4px hsl(0deg 0% 0% / 0.075),
+      0 8px 8px hsl(0deg 0% 0% / 0.075),
+      0 16px 16px hsl(0deg 0% 0% / 0.075);
+    }
+
+    ul > li > img,
+    ul > li > video {
+      object-fit: cover;
     }
   `;
 
@@ -65,13 +82,49 @@ export default class StorixPhotos extends LitElement {
   }
 
   renderItem (item) {
-    console.log(item)
-    return html`
-      <li>
-        <img src="/fs/files/${item.uuid}" loading="lazy" width="500" />
-      ${item.description}
-      </li>
-    `;
+
+    if ( item.type === 'image' ) {
+      return html`
+        <li>
+          <img alt="${item.description}" src="/fs/files/${item.uuid}" loading="lazy" @load=${this._onImageLoad.bind(this)} />
+        </li>
+      `;
+    }
+
+    if ( item.type === 'video' ) {
+      return html`
+        <li>
+          <video src="/fs/files/${item.uuid}" loading="lazy" preload="metadata" controls @loadedmetadata=${this._onImageLoad.bind(this)}></video>
+        </li>
+      `;
+    }
+
+  }
+
+  _onImageLoad (e) {
+    const img = e.currentTarget;
+    const parent = img.parentElement;
+
+    const isLandscape = img.width > img.height;
+    const isPortrait = img.height > img.width;
+
+    img.style.width = '100%';
+    img.style.height = '100%';
+
+    if ( isLandscape ) {
+      parent.setAttribute('style', 'grid-column: span 8; grid-row: span 12;');
+    } else {
+      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 24;');
+    }
+
+
+    console.log({
+      orientation: isLandscape ? 'horizontal' : 'vertical',
+      width: img.width,
+      height: img.height,
+      isPortrait: isPortrait
+    });
+
   }
 
 }

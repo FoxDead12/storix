@@ -22,12 +22,13 @@ export default class FileOps extends Job {
         'extension',
         'size',
         'birthtime',
-        'folder_id'
+        'folder_id',
+        'type'
       ],
       filters: new Array(),
       order_by: 'birthtime, create_at',
       offset: 0,
-      limit: 100
+      limit: 20
     }
 
     if ( this.job.params.hasOwnProperty('filter[p_photos]') ) {

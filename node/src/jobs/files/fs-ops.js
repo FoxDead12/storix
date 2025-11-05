@@ -5,8 +5,6 @@ import fs from 'fs/promises';
 import fss from 'fs';
 import HTTPError from "../../classes/http-error.js";
 import { fileTypeFromFile } from 'file-type';
-import mime from "mime";
-
 
 // export default class FsOps extends Job {
 //
@@ -223,23 +221,27 @@ export default class FsOps extends Job {
 
   async get () {
 
+    // ... parse uuid from url ...
     const match = this.req.url.match(/^\/files\/([A-Za-z0-9-]+)/);
     const uuid = match[1];
     if (!match || !match[1]) {
       return this.reportError({ message: "Need indicate the uuid of file"});
     }
 
+    // ... get file from database ...
     let file = await this.db.query(`SELECT id, path, description, extension FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
     file = file.rows[0];
 
     const file_aboslute = path.join(this.config.upload_dir, file.path);
 
+    // ... check if is a range request ...
     const range = this.req.headers.range;
-    if (range) {
-      // TODO: NEED REVIEW THIS CODE
+    if ( range ) {
       this.res.statusCode = 206;
-      const stat = await fs.stat(file_aboslute);
-      const fileSize = stat.size;
+
+      const stats = await fs.stat(file_aboslute);
+      const fileSize = stats.size;
+
       const parts = range.replace(/bytes=/, "").split("-");
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -247,25 +249,17 @@ export default class FsOps extends Job {
       this.res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
       this.res.setHeader('Accept-Ranges', 'bytes');
       this.res.setHeader('Content-Length', (end - start) + 1);
-
-      const stream = fss.createReadStream(file_aboslute, {start, end});
-      stream.pipe(this.res);
-
-      stream.on("error", () => {
-        return this.reportError({ message: "Error append reading file"});
-      });
-
+      var stream = fss.createReadStream(file_aboslute, {start, end});
     } else {
-      // ... send file in chunks ...
-      this.res.statusCode = 200;
-      console.log(file_aboslute)
-      const stream = fss.createReadStream(file_aboslute);
-      stream.pipe(this.res);
-
-      stream.on("error", () => {
-        return this.reportError({ message: "Error append reading file"});
-      });
+      var stream = fss.createReadStream(file_aboslute);
     }
+
+    // ... upload all file to client ...
+    stream.pipe(this.res);
+    stream.on('error', (e) => {
+      this.logger.error(e);
+      return this.reportError({ message: "Error append reading file"});
+    });
 
   }
 
@@ -341,7 +335,7 @@ export default class FsOps extends Job {
       mime_type.ext,
       file_stats.size,
       file_stats.birthtime,
-      file_absolute,
+      file_relative,
       file_name,
       directory_id
     ]);
