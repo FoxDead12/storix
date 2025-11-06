@@ -1,6 +1,6 @@
 {
   "port": 5002,
   "host": "localhost",
-  "upload_dir": "/home/david-xavier/dev/storix-uploads"
+  "upload_dir": "/home/dx3/storix-uploads"
 
 }

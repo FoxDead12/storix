@@ -5,8 +5,6 @@ import '../components/storix-icon.js'
 import '@polymer/paper-button/paper-button.js';
 import '@polymer/paper-progress/paper-progress.js';
 
-
-
 export default class StorixUploadFiles extends StorixDialogPage {
 
   static styles = css`
@@ -183,7 +181,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
 
     const files = e.target.files || e.dataTransfer.files
     for (const file of files ) {
-      file.id = crypto.randomUUID();
+      file.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
       this._upload(file);
       this.files = [...this.files ,file];
     }

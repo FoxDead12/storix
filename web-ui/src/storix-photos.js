@@ -70,6 +70,8 @@ export default class StorixPhotos extends LitElement {
 
     ul > li {
       aspect-ratio: 1 / 1;
+      grid-column: span 6;
+      grid-row: span 34;
       width: 100%;
       height: 100%;
       overflow: hidden;
