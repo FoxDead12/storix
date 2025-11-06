@@ -21,9 +21,55 @@ export default class StorixPhotos extends LitElement {
       height: 100%;
     }
 
+    @media (max-width: 3440px) {
+      ul {
+        grid-template-columns: repeat(42, 1fr);
+      }
+    }
+
+    @media (max-width: 3439px) {
+      ul {
+        grid-template-columns: repeat(36, 1fr);
+      }
+    }
+
+    @media (max-width: 2560px) {
+      ul {
+        grid-template-columns: repeat(30, 1fr);
+      }
+    }
+
+    @media (max-width: 1920px) {
+      ul {
+        grid-template-columns: repeat(24, 1fr);
+      }
+    }
+
+    @media (max-width: 1440px) {
+      ul {
+        grid-template-columns: repeat(18, 1fr);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      ul {
+        grid-template-columns: repeat(12, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      ul {
+        grid-template-columns: 1fr;
+      }
+
+      ul > li {
+        grid-column: span 1 !important; /* 👈 força cada item a ocupar só 1 coluna */
+        grid-row: 1fr !important;
+      }
+    }
+
     ul > li {
-      grid-column: span 8;
-      grid-row: span 24;
+      aspect-ratio: 1 / 1;
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -112,9 +158,9 @@ export default class StorixPhotos extends LitElement {
     img.style.height = '100%';
 
     if ( isLandscape ) {
-      parent.setAttribute('style', 'grid-column: span 8; grid-row: span 12;');
+      parent.setAttribute('style', 'grid-column: span 12; grid-row: span 24;');
     } else {
-      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 24;');
+      parent.setAttribute('style', 'grid-column: span 6; grid-row: span 34;');
     }
 
 
