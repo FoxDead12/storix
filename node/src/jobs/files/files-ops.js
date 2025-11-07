@@ -40,7 +40,7 @@ export default class FileOps extends Job {
     }
 
     if ( this.job.params.hasOwnProperty('page') && Number(this.job.params['page']) > 1 ) {
-      queryProps.offset = (queryProps.offset * this.job.params['page']) + queryProps.limit;
+      queryProps.offset = queryProps.limit * this.job.params['page'];
     }
 
     const query = `

@@ -6,6 +6,7 @@ export default class StorixPhotos extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
+      display: flex;
     }
 
     ul {
@@ -18,7 +19,6 @@ export default class StorixPhotos extends LitElement {
       grid-auto-rows: 1fr;
       grid-auto-flow: dense;
       overflow-y: auto;
-      height: 100%;
     }
 
     @media (max-width: 3440px) {
@@ -82,6 +82,8 @@ export default class StorixPhotos extends LitElement {
       0 4px 4px hsl(0deg 0% 0% / 0.075),
       0 8px 8px hsl(0deg 0% 0% / 0.075),
       0 16px 16px hsl(0deg 0% 0% / 0.075);
+      border-radius: 5px;
+      overflow: hidden;
     }
 
     ul > li > img,
@@ -101,6 +103,9 @@ export default class StorixPhotos extends LitElement {
   `;
 
   static properties = {
+    _stopFetch: {
+      typeof: Boolean
+    },
     items: {
       typeof: Array
     },
@@ -112,31 +117,59 @@ export default class StorixPhotos extends LitElement {
   constructor () {
     super();
     this.items = new Array();
+    this._stopFetch = false;
     this.page = 1;
   }
 
   render () {
     return html`
-      <ul class="files-list" id="files-list" >
+      <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
       </ul>
     `
   }
 
-  firstUpdated () {
-    this.fetchPhotos()
-  }
-
   updated (changeProps) {
-    console.log(changeProps)
+    if ( changeProps.has('page') && !this._stopFetch) {
+      this.fetchPhotos()
+    }
   }
 
   async fetchPhotos () {
 
-    const result = await app.broker.get('files?filter[p_photos]=true');
+    const result = await app.broker.get('files?filter[p_photos]=true&page=' + this.page);
     this.items.push(...result.response);
-    this.requestUpdate('items');
+    this.requestUpdate();
+    if ( result.response.length < 20 ) {
+      this._stopFetch = true;
+    }
 
+  }
+
+  _onImageLoad (e) {
+    const img = e.currentTarget;
+    const parent = img.parentElement;
+
+    const isLandscape = img.width > img.height;
+
+    img.style.width = '100%';
+    img.style.height = '100%';
+
+    if ( isLandscape ) {
+      parent.setAttribute('style', 'grid-column: span 12; grid-row: span 24;');
+    } else {
+      parent.setAttribute('style', 'grid-column: span 6; grid-row: span 34;');
+    }
+
+  }
+
+  onScroll (e) {
+    if ( this._stopFetch ) return;
+
+    const element = e.currentTarget;
+    if ( element.offsetHeight + element.scrollTop >= element.scrollHeight - 100 ) {
+      this.page += 1;
+    }
   }
 
   renderItem (item) {
@@ -158,33 +191,6 @@ export default class StorixPhotos extends LitElement {
     }
 
   }
-
-  _onImageLoad (e) {
-    const img = e.currentTarget;
-    const parent = img.parentElement;
-
-    const isLandscape = img.width > img.height;
-    const isPortrait = img.height > img.width;
-
-    img.style.width = '100%';
-    img.style.height = '100%';
-
-    if ( isLandscape ) {
-      parent.setAttribute('style', 'grid-column: span 12; grid-row: span 24;');
-    } else {
-      parent.setAttribute('style', 'grid-column: span 6; grid-row: span 34;');
-    }
-
-
-    console.log({
-      orientation: isLandscape ? 'horizontal' : 'vertical',
-      width: img.width,
-      height: img.height,
-      isPortrait: isPortrait
-    });
-
-  }
-
 }
 
 customElements.define('storix-photos', StorixPhotos);
