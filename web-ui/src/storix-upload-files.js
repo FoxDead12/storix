@@ -126,7 +126,6 @@ export default class StorixUploadFiles extends StorixDialogPage {
 
         ${ this.files.length === 0
           ? html`
-            <input type="file" id="file" hidden multiple  @change=${this._filesUpload.bind(this)}/>
             <storix-icon icon="cloud-arrow-up"></storix-icon>
             <h5>Drag&Drop files here</h5>
             <p>or</p>
@@ -139,6 +138,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
         }
 
         <paper-button id="search-files" @click=${this._openInputFile.bind(this)}>Browser Files</paper-button>
+        <input type="file" id="file"  multiple @change=${this._filesUpload.bind(this)}/>
 
       </div>
     `;
@@ -174,6 +174,8 @@ export default class StorixUploadFiles extends StorixDialogPage {
   }
 
   _openInputFile (e) {
+    e.preventDefault();
+    e.stopPropagation();
     this.inputFile.click();
   }
 
