@@ -138,7 +138,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
         }
 
         <paper-button id="search-files" @click=${this._openInputFile.bind(this)}>Browser Files</paper-button>
-        <input type="file" id="file"  multiple @change=${this._filesUpload.bind(this)}/>
+        <input type="file" id="file" hidden multiple @change=${this._filesUpload.bind(this)}/>
 
       </div>
     `;

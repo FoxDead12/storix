@@ -4,7 +4,9 @@ import path from 'path';
 import fs from 'fs/promises';
 import fss from 'fs';
 import HTTPError from "../../classes/http-error.js";
+import sharp from 'sharp';
 import { fileTypeFromFile } from 'file-type';
+import { spawn } from "node:child_process";
 
 // export default class FsOps extends Job {
 //
@@ -202,6 +204,14 @@ import { fileTypeFromFile } from 'file-type';
 
 export default class FsOps extends Job {
 
+  static imagesValideMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/avif",
+  ];
+
   async perform (job) {
 
     this.job = job;
@@ -229,10 +239,10 @@ export default class FsOps extends Job {
     }
 
     // ... get file from database ...
-    let file = await this.db.query(`SELECT id, path, description, extension FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
+    let file = await this.db.query(`SELECT uuid, path, description, extension FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
     file = file.rows[0];
 
-    const file_aboslute = path.join(this.config.upload_dir, file.path);
+    const file_aboslute = path.join(this.config.upload_dir, this.job.user_schema, 'templates', file.uuid.toString());
 
     // ... check if is a range request ...
     const range = this.req.headers.range;
@@ -278,6 +288,7 @@ export default class FsOps extends Job {
     const uuid = crypto.randomUUID();
     const file_relative = path.join(this.job.user_schema, uuid);
     const file_absolute = path.join(this.config.upload_dir, file_relative);
+    const file_thumbail_absolute = path.join(this.config.upload_dir, this.job.user_schema, 'templates', uuid);
 
     // ... create folder if dont exist ...
     await fs.mkdir(path.dirname(file_absolute), { recursive: true });
@@ -293,12 +304,12 @@ export default class FsOps extends Job {
         this.logger.error(error);
         writeStream.destroy();
         await fs.unlink(file_absolute);
-        rej(HTTPError('Error uploading the file', 400));
+        rej(new HTTPError('Error uploading the file', 400));
       });
       this.req.on("aborted", async () => {
         writeStream.destroy();
         await fs.unlink(file_absolute);
-        rej(HTTPError('Error uploading the file', 400));
+        rej(new HTTPError('Error uploading the file', 400));
       });
     });
 
@@ -317,9 +328,83 @@ export default class FsOps extends Job {
     // ... check mime type to see each file type ...
     let file_type = null;
     if (mime_type.mime.startsWith('image/')) {
+
       file_type = 'image';
+
+      try {
+
+        if ( !FsOps.imagesValideMimeTypes.includes(mime_type.mime) ) {
+          // JPEG, PNG, WebP, GIF and AVIF
+          await fs.unlink(file_absolute);
+          throw new Error('Invalid image type received');
+        }
+
+        // ... create thumbnail ...
+        let image = sharp(file_absolute);
+        await fs.mkdir(path.dirname(file_thumbail_absolute), { recursive: true });
+
+        switch (mime_type.mime) {
+          case "image/jpeg":
+          case "image/jpg":
+            await image.jpeg({ quality: 50 }).rotate().resize({ width: 1200, withoutEnlargement: true }).toFile(file_thumbail_absolute); break;
+          case "image/png":
+            await image.png({ compressionLevel: 9 }).rotate().resize({ width: 1200, withoutEnlargement: true }).toFile(file_thumbail_absolute);  break;
+          case "image/webp":
+            await image.webp({ quality: 50 }).rotate().resize({ width: 1200, withoutEnlargement: true }).toFile(file_thumbail_absolute); break;
+          case "image/gif":
+            // Sharp converte GIFs estáticos; para animados use giflossy ou outro lib
+            await image.gif({ effort: 7 }).rotate().resize({ width: 1200, withoutEnlargement: true }).toFile(file_thumbail_absolute); break;
+          case "image/avif":
+            await image.avif({ quality: 60 }).rotate().resize({ width: 1200, withoutEnlargement: true }).toFile(file_thumbail_absolute); break;
+          default:
+            await fs.unlink(file_absolute);
+            throw new HTTPError('Invalid mime type detect, can compress', 400);
+        }
+
+      } catch (e) {
+        this.logger.error(e);
+        await fs.unlink(file_absolute);
+        throw new HTTPError('Invalid mime type detect, can compress', 400);
+      }
+
     } else if (mime_type.mime.startsWith('video/')) {
+
       file_type = 'video';
+
+      try {
+
+        await fs.mkdir(path.dirname(file_thumbail_absolute), { recursive: true });
+
+        await new Promise((res, rej) => {
+
+          const ffmpeg = spawn("ffmpeg", [
+            "-ss", "1",                    // segundo 1
+            "-i", file_absolute,           // vídeo de entrada
+            "-frames:v", "1",              // extrai 1 frame
+            "-q:v", "2",                   // qualidade da imagem
+            "-f", "image2",
+            "-y",                          // sobrescreve se já existir
+            file_thumbail_absolute,       // saída (deve ter .jpg!)
+          ]);
+
+          ffmpeg.on('error', async (e) => {
+            this.logger.error(e)
+            rej(e);
+          })
+
+          ffmpeg.on('close', (code) => {
+            console.log(code)
+            res();
+          });
+
+        });
+
+      } catch (e) {
+        this.logger.error(e);
+        await fs.unlink(file_absolute);
+        throw new HTTPError('Error uploading video', 500);
+      }
+
     } else {
       file_type = 'file';
     }

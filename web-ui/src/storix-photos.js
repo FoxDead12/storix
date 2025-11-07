@@ -118,7 +118,7 @@ export default class StorixPhotos extends LitElement {
     super();
     this.items = new Array();
     this._stopFetch = false;
-    this.page = 1;
+    this.page = 0;
   }
 
   render () {
