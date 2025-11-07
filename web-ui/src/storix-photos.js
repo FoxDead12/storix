@@ -88,6 +88,16 @@ export default class StorixPhotos extends LitElement {
     ul > li > video {
       object-fit: cover;
     }
+
+    ul > li > video:-webkit-full-screen,
+    ul > li > img:-webkit-full-screen {
+      object-fit: contain;
+    }
+
+    ul > li > video:-moz-full-screen,
+    ul > li > img:-moz-full-screen {
+      object-fit: contain;
+    }
   `;
 
   static properties = {
