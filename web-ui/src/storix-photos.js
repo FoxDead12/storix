@@ -69,6 +69,7 @@ export default class StorixPhotos extends LitElement {
     }
 
     ul > li {
+      position: relative;
       aspect-ratio: 1 / 1;
       grid-column: span 6;
       grid-row: span 34;
@@ -91,15 +92,21 @@ export default class StorixPhotos extends LitElement {
       object-fit: cover;
     }
 
-    ul > li > video:-webkit-full-screen,
-    ul > li > img:-webkit-full-screen {
+    ul > li > video {
+      width: 100%;
+      height: 100%;
+    }
+
+    video:-webkit-full-screen,
+    img:-webkit-full-screen {
       object-fit: contain;
     }
 
-    ul > li > video:-moz-full-screen,
-    ul > li > img:-moz-full-screen {
+    video:-moz-full-screen,
+    img:-moz-full-screen {
       object-fit: contain;
     }
+
   `;
 
   static properties = {
@@ -163,6 +170,22 @@ export default class StorixPhotos extends LitElement {
 
   }
 
+  _onVideoPlay (e) {
+    const video = e.currentTarget;
+    const src = video.dataset.src;
+
+    // Só adiciona o source quando o utilizador der play
+    if (!video.querySelector('source')) {
+      const source = document.createElement('source');
+      source.src = src;
+      video.appendChild(source);
+    }
+
+    // Carrega o vídeo e começa a reproduzir
+    video.load();
+    video.play();
+  }
+
   onScroll (e) {
     if ( this._stopFetch ) return;
 
@@ -174,11 +197,26 @@ export default class StorixPhotos extends LitElement {
 
   renderItem (item) {
 
-    return html`
+    if ( item.type === 'image' ) {
+
+      return html`
       <li>
-        <img alt="${item.description}" src="/fs/files/${item.uuid}" loading="lazy" @load=${this._onImageLoad.bind(this)} />
+        <img alt="${item.description}" src="/fs/files/${item.uuid}?filter[thumbnail]=true" loading="lazy" @load=${this._onImageLoad.bind(this)} />
       </li>
-    `;
+      `;
+
+    }
+
+    if ( item.type === 'video' ) {
+
+      return html`
+        <li>
+          <video poster="/fs/files/${item.uuid}?filter[thumbnail]=true" loading="lazy" preload="none" data-src="/fs/files/${item.uuid}" controls @load=${this._onImageLoad.bind(this)} @play=${this._onVideoPlay.bind(this)} >
+          </video>
+        </li>
+      `
+
+  }
 
   }
 }

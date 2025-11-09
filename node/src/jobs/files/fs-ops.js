@@ -242,7 +242,13 @@ export default class FsOps extends Job {
     let file = await this.db.query(`SELECT uuid, path, description, extension FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
     file = file.rows[0];
 
-    const file_aboslute = path.join(this.config.upload_dir, this.job.user_schema, 'templates', file.uuid.toString());
+    // filter[thumbnail]
+    let file_aboslute = '';
+    if ( this.job.params.hasOwnProperty('filter[thumbnail]') ) {
+      file_aboslute = path.join(this.config.upload_dir, this.job.user_schema, 'templates', file.uuid.toString());
+    } else {
+      file_aboslute = path.join(this.config.upload_dir, this.job.user_schema, file.uuid.toString());
+    }
 
     // ... check if is a range request ...
     const range = this.req.headers.range;
