@@ -1,5 +1,6 @@
-import { html, LitElement, css } from "lit";
+import { html, LitElement, css, render } from "lit";
 import { repeat } from 'lit/directives/repeat.js';
+import '../components/storix-icon.js';
 
 export default class StorixPhotos extends LitElement {
 
@@ -87,12 +88,28 @@ export default class StorixPhotos extends LitElement {
       overflow: hidden;
     }
 
-    ul > li > img,
-    ul > li > video {
+    ul > li > img {
       object-fit: cover;
     }
 
-    ul > li > video {
+    .video-container {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .video-container paper-button {
+      width: 100%;
+      height: 100%;
+    }
+
+    video {
+      position: absolute;
+      object-fit: cover;
+      left: 0px;
+      top: 0px;
       width: 100%;
       height: 100%;
     }
@@ -170,22 +187,6 @@ export default class StorixPhotos extends LitElement {
 
   }
 
-  _onVideoPlay (e) {
-    const video = e.currentTarget;
-    const src = video.dataset.src;
-
-    // Só adiciona o source quando o utilizador der play
-    if (!video.querySelector('source')) {
-      const source = document.createElement('source');
-      source.src = src;
-      video.appendChild(source);
-    }
-
-    // Carrega o vídeo e começa a reproduzir
-    video.load();
-    video.play();
-  }
-
   onScroll (e) {
     if ( this._stopFetch ) return;
 
@@ -195,17 +196,34 @@ export default class StorixPhotos extends LitElement {
     }
   }
 
+  _renderVideo (e) {
+    const item = e.currentTarget.item;
+    const element = document.createElement('video');
+
+    element.src = `fs/files/${item.uuid}`;
+    element.loading = "lazy";
+    element.preload = "none";
+    element.controls = true;
+    element.autoplay = true;
+    element.addEventListener('blur', () => element.remove());
+
+    e.currentTarget.parentElement.append(element);
+  }
+
   renderItem (item) {
 
-    if ( item.type === 'image' ) {
-
-      return html`
+    return html`
       <li>
         <img alt="${item.description}" src="/fs/files/${item.uuid}?filter[thumbnail]=true" loading="lazy" @load=${this._onImageLoad.bind(this)} />
-      </li>
-      `;
 
-    }
+        ${ item.type === 'video' ? html`
+          <div class="video-container">
+            <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" ></paper-button>
+          </div>
+        ` : '' }
+
+      </li>
+    `;
 
     if ( item.type === 'video' ) {
 

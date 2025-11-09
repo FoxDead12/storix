@@ -190,42 +190,131 @@ export default class StorixUploadFiles extends StorixDialogPage {
 
   }
 
-  _upload (file) {
-    let progress = 0;
-    const xhr = new XMLHttpRequest();
-
+  async _upload (file) {
     const uploadUrl = new URL('/fs/upload', window.origin);
     uploadUrl.searchParams.append('file_name', file.name);
     uploadUrl.searchParams.append('directory', 0);
 
-    xhr.open('POST', uploadUrl);
-    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+    // const progressBar = this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress');
+    // const fileElement = this.shadowRoot.getElementById(file.id.toString());
+    // progressBar.value = 0;
+    // progressBar.indeterminate = false;
 
-    xhr.progress = (e) => {
-      progress = Math.round((e.loaded / e.total) * 100);
-      this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
-    }
+//     const totalSize = file.size;
+//     let uploaded = 0;
+//
+//     const stream = new ReadableStream({
+//       start(controller) {
+//         const reader = file.stream().getReader();
+//
+//         function push() {
+//           reader.read().then(({ done, value }) => {
+//             if (done) {
+//               controller.close();
+//               return;
+//             }
+//
+//             uploaded += value.length;
+//
+//             // Atualiza a barra de progresso (0 a 100)
+//             const percent = Math.floor((uploaded / totalSize) * 100);
+//             console.log(percent)
+//             // this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = percent;
+//
+//             controller.enqueue(value);
+//             push();
+//           });
+//         }
+//
+//         push();
+//       },
+//     });
+//
+//     console.log(stream)
 
-    xhr.onload = () => {
-      if ( xhr.status == 200 ) {
-        this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = 100;
-        this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
-      } else {
-        this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-      }
-    };
 
-    xhr.onerror = () => {
-      console.log("erro");
-      this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-    };
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = file.stream().getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          controller.enqueue(value);
+        }
+        controller.close();
+      },
+    });
 
-    xhr.onabort = () => {
-      console.log("ficheiro abortado");
-      this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-    };
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+      },
+      body: stream,
+      duplex: 'half'
+    });
 
-    xhr.send(file);
+    console.log(response)
+
+//     const stream = new ReadableStream({
+//       start(controller) {
+//         const reader = file.stream().getReader();
+//
+//         function push() {
+//           reader.read().then(({ done, value }) => {
+//             if (done) {
+//               controller.close();
+//               return;
+//             }
+//
+//             uploaded += value.length;
+//             this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value =  Math.round((uploaded / totalSize) * 100);
+//
+//             controller.enqueue(value);
+//             push();
+//           });
+//         }
+//
+//         push();
+//       },
+//     });
+
+    // fetch(uploadUrl, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/octet-stream',
+    //   },
+    //   body: file,
+    // });
+
+//     xhr.open('POST', uploadUrl);
+//     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+//
+//     xhr.progress = (e) => {
+//       progress = Math.round((e.loaded / e.total) * 100);
+//       this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
+//     }
+//
+//     xhr.onload = () => {
+//       if ( xhr.status == 200 ) {
+//         this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = 100;
+//         this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
+//       } else {
+//         this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+//       }
+//     };
+//
+//     xhr.onerror = () => {
+//       console.log("erro");
+//       this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+//     };
+//
+//     xhr.onabort = () => {
+//       console.log("ficheiro abortado");
+//       this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+//     };
+//
+//     xhr.send(file);
   }
 
   // -------------------------------------------------------------------- //
@@ -236,7 +325,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
     return html`
       <li id="${file.id}">
         <p>${file.name}</p>
-        <paper-progress value="0"></paper-progress>
+        <paper-progress value="0" indeterminate></paper-progress>
       </li>
     `
   }
