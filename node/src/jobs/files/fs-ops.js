@@ -300,16 +300,24 @@ export default class FsOps extends Job {
     await new Promise((res, rej) => {
       this.req.pipe(writeStream);
       writeStream.on('finish', () => res());
+
       writeStream.on('error', async (error) => {
         this.logger.error(error);
+        this.req.unpipe(writeStream);
         writeStream.destroy();
-        await fs.unlink(file_absolute);
-        rej(new HTTPError('Error uploading the file', 400));
+        writeStream.on('close', async () => {
+          await fs.unlink(file_absolute);
+          rej(new HTTPError('Error uploading the file', 400));
+        });
       });
+
       this.req.on("aborted", async () => {
+        this.req.unpipe(writeStream);
         writeStream.destroy();
-        await fs.unlink(file_absolute);
-        rej(new HTTPError('Error uploading the file', 400));
+        writeStream.on('close', async () => {
+          await fs.unlink(file_absolute);
+          rej(new HTTPError('Error uploading the file', 400));
+        });
       });
     });
 
@@ -378,22 +386,25 @@ export default class FsOps extends Job {
         await new Promise((res, rej) => {
 
           const ffmpeg = spawn("ffmpeg", [
-            "-ss", "1",                    // segundo 1
-            "-i", file_absolute,           // vídeo de entrada
-            "-frames:v", "1",              // extrai 1 frame
-            "-q:v", "2",                   // qualidade da imagem
-            "-f", "image2",
-            "-y",                          // sobrescreve se já existir
-            file_thumbail_absolute,       // saída (deve ter .jpg!)
+            '-i', file_absolute,
+            "-vf", "scale='min(1200,iw)':'min(1200,ih)':force_original_aspect_ratio=decrease", // max width/height 1200
+            '-frames:v', '1',
+            '-f', 'image2',
+            "-vcodec", "libwebp",
+            "-compression_level", "6",  // 0–6, sendo 6 o máximo
+            "-qscale", "50",            // qualidade (0–100)
+            file_thumbail_absolute
           ]);
 
           ffmpeg.on('error', async (e) => {
             this.logger.error(e)
             rej(e);
-          })
+          });
 
           ffmpeg.on('close', (code) => {
-            console.log(code)
+            if (code != 0) {
+              return rej(code)
+            }
             res();
           });
 

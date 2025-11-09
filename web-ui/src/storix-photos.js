@@ -174,21 +174,11 @@ export default class StorixPhotos extends LitElement {
 
   renderItem (item) {
 
-    if ( item.type === 'image' ) {
-      return html`
-        <li>
-          <img alt="${item.description}" src="/fs/files/${item.uuid}" loading="lazy" @load=${this._onImageLoad.bind(this)} />
-        </li>
-      `;
-    }
-
-    if ( item.type === 'video' ) {
-      return html`
-        <li>
-          <video src="/fs/files/${item.uuid}" loading="lazy" preload="metadata" controls @loadedmetadata=${this._onImageLoad.bind(this)}></video>
-        </li>
-      `;
-    }
+    return html`
+      <li>
+        <img alt="${item.description}" src="/fs/files/${item.uuid}" loading="lazy" @load=${this._onImageLoad.bind(this)} />
+      </li>
+    `;
 
   }
 }

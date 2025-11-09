@@ -138,7 +138,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
         }
 
         <paper-button id="search-files" @click=${this._openInputFile.bind(this)}>Browser Files</paper-button>
-        <input type="file" id="file" hidden multiple @change=${this._filesUpload.bind(this)}/>
+        <input type="file" id="file"  multiple @change=${this._filesUpload.bind(this)}/>
 
       </div>
     `;
@@ -201,11 +201,9 @@ export default class StorixUploadFiles extends StorixDialogPage {
     xhr.open('POST', uploadUrl);
     xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
-    xhr.upload.progress = (e) => {
-      if (e.lengthComputable) {
-        progress = Math.round((e.loaded / e.total) * 100);
-        this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
-      }
+    xhr.progress = (e) => {
+      progress = Math.round((e.loaded / e.total) * 100);
+      this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
     }
 
     xhr.onload = () => {
