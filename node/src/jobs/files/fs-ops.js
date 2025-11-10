@@ -328,7 +328,7 @@ export default class FsOps extends Job {
 
     // ... get file stats ...
     const file_stats = await fs.stat(file_absolute);
-    console.log(file_stats)
+
     // ... get real type extension of file ...
     const mime_type = await fileTypeFromFile(file_absolute);
 
