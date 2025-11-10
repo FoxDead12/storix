@@ -90,6 +90,7 @@ export default class StorixPhotos extends LitElement {
 
     ul > li > img {
       object-fit: cover;
+      color: transparent;
     }
 
     .video-container {
@@ -185,6 +186,25 @@ export default class StorixPhotos extends LitElement {
       parent.setAttribute('style', 'grid-column: span 6; grid-row: span 34;');
     }
 
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if ( img.src == window.location.href ) {
+            const uuid = img.getAttribute('uuid');
+            img.setAttribute('src', `/fs/files/${uuid}?filter[thumbnail]=true`);
+          }
+        } else {
+          img.setAttribute('src', ``);
+        }
+      });
+    },{
+      root: null, // null = viewport do browser
+      rootMargin: '200px 0px 200px 0px', // margem superior e inferior de 200px
+      threshold: 0 // ativa assim que entra nessa margem
+    });
+
+    observer.observe(img);
+
   }
 
   onScroll (e) {
@@ -208,13 +228,18 @@ export default class StorixPhotos extends LitElement {
     element.addEventListener('blur', () => element.remove());
 
     e.currentTarget.parentElement.append(element);
+
+    setTimeout(() => {
+      element.focus();
+    }, 100);
   }
 
   renderItem (item) {
 
+
     return html`
       <li>
-        <img alt="${item.description}" src="/fs/files/${item.uuid}?filter[thumbnail]=true" loading="lazy" @load=${this._onImageLoad.bind(this)} />
+        <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
 
         ${ item.type === 'video' ? html`
           <div class="video-container">
@@ -224,17 +249,6 @@ export default class StorixPhotos extends LitElement {
 
       </li>
     `;
-
-    if ( item.type === 'video' ) {
-
-      return html`
-        <li>
-          <video poster="/fs/files/${item.uuid}?filter[thumbnail]=true" loading="lazy" preload="none" data-src="/fs/files/${item.uuid}" controls @load=${this._onImageLoad.bind(this)} @play=${this._onVideoPlay.bind(this)} >
-          </video>
-        </li>
-      `
-
-  }
 
   }
 }

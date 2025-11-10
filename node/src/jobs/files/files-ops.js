@@ -26,7 +26,7 @@ export default class FileOps extends Job {
         'type'
       ],
       filters: new Array(),
-      order_by: 'birthtime, create_at',
+      order_by: 'birthtime DESC, create_at DESC',
       offset: 0,
       limit: 20
     }

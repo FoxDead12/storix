@@ -47,6 +47,13 @@ export default class StorixDialog extends LitElement {
       display: flex;
     }
 
+    @media (max-width: 768px) {
+      .pages-container {
+        width: auto;
+        min-height: 500px;
+      }
+    }
+
     .page-container {
       overflow: hidden;
       flex: none;

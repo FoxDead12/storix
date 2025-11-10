@@ -25,6 +25,12 @@ export default class StorixUploadFiles extends StorixDialogPage {
       padding: 12px 16px;
     }
 
+
+    @media (max-width: 768px) {
+
+    }
+
+
     .dropzone > storix-icon {
       color: #ccc;
       width: 128px;
@@ -46,7 +52,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
       color: #ccc;
     }
 
-    .dropzone > paper-button {
+    .dropzone paper-button {
       background-color: var(--primary-color);
       font-weight: normal;
       color: #fff;
@@ -76,7 +82,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
     }
 
     .dropzone > ul > li {
-      width: 30%;
+      width: 100%;
       flex-grow: 1;
     }
 
@@ -137,8 +143,10 @@ export default class StorixUploadFiles extends StorixDialogPage {
           `
         }
 
-        <paper-button id="search-files" @click=${this._openInputFile.bind(this)}>Browser Files</paper-button>
-        <input type="file" id="file"  multiple @change=${this._filesUpload.bind(this)}/>
+        <label for="file">
+          <paper-button id="search-files">Browser Files</paper-button>
+        </label>
+        <input type="file" id="file" hidden multiple @change=${this._filesUpload.bind(this)}/>
 
       </div>
     `;
@@ -174,9 +182,8 @@ export default class StorixUploadFiles extends StorixDialogPage {
   }
 
   _openInputFile (e) {
-    e.preventDefault();
-    e.stopPropagation();
     this.inputFile.click();
+    this.inputFile.pointerenter();
   }
 
   _filesUpload (e) {
