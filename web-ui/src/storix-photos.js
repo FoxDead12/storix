@@ -7,73 +7,29 @@ export default class StorixPhotos extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
-      display: flex;
+      height: 100%;
+      margin: 12px 16px;
     }
 
     ul {
+      max-height: 100%;
       list-style: none;
-      padding: 12px 16px;
+      padding: 0px;
       margin: 0px;
       gap: 1rem;
       display: grid;
-      grid-template-columns: repeat(24, 1fr);
-      grid-auto-rows: 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-auto-rows: 100px;
+
       grid-auto-flow: dense;
       overflow-y: auto;
     }
 
-    @media (max-width: 3440px) {
-      ul {
-        grid-template-columns: repeat(42, 1fr);
-      }
-    }
-
-    @media (max-width: 3439px) {
-      ul {
-        grid-template-columns: repeat(36, 1fr);
-      }
-    }
-
-    @media (max-width: 2560px) {
-      ul {
-        grid-template-columns: repeat(30, 1fr);
-      }
-    }
-
-    @media (max-width: 1920px) {
-      ul {
-        grid-template-columns: repeat(24, 1fr);
-      }
-    }
-
-    @media (max-width: 1440px) {
-      ul {
-        grid-template-columns: repeat(18, 1fr);
-      }
-    }
-
-    @media (max-width: 1024px) {
-      ul {
-        grid-template-columns: repeat(12, 1fr);
-      }
-    }
-
-    @media (max-width: 768px) {
-      ul {
-        grid-template-columns: 1fr;
-      }
-
-      ul > li {
-        grid-column: span 1 !important; /* 👈 força cada item a ocupar só 1 coluna */
-        grid-row: 1fr !important;
-      }
-    }
 
     ul > li {
       position: relative;
-      aspect-ratio: 1 / 1;
-      grid-column: span 6;
-      grid-row: span 34;
+      grid-column: span 2;
+      grid-row: span 3;
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -161,9 +117,13 @@ export default class StorixPhotos extends LitElement {
     `
   }
 
+  firstUpdated () {
+    this.list = this.shadowRoot.getElementById('files-list');
+  }
+
   updated (changeProps) {
     if ( changeProps.has('page') && !this._stopFetch) {
-      this.fetchPhotos()
+      this.fetchPhotos();
     }
   }
 
@@ -172,13 +132,21 @@ export default class StorixPhotos extends LitElement {
     const result = await app.broker.get('files?filter[p_photos]=true&page=' + this.page);
     this.items.push(...result.response);
     this.requestUpdate();
+
+    await this.updateComplete;
+
     if ( result.response.length < 20 ) {
       this._stopFetch = true;
+    } else {
+      if ( this.list.clientHeight < this.clientHeight ) {
+        this.page += 1;
+      }
     }
 
   }
 
   _onImageLoad (e) {
+
     const img = e.currentTarget;
     const parent = img.parentElement;
 
@@ -187,10 +155,10 @@ export default class StorixPhotos extends LitElement {
     img.style.width = '100%';
     img.style.height = '100%';
 
-    if ( isLandscape ) {
-      parent.setAttribute('style', 'grid-column: span 12; grid-row: span 24;');
+    if (isLandscape) {
+      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 2;');
     } else {
-      parent.setAttribute('style', 'grid-column: span 6; grid-row: span 34;');
+      parent.setAttribute('style', 'grid-column: span 2; grid-row: span 3;');
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -206,7 +174,7 @@ export default class StorixPhotos extends LitElement {
       });
     },{
       root: null, // null = viewport do browser
-      rootMargin: '200px 0px 200px 0px', // margem superior e inferior de 200px
+      rootMargin: '100px 0px 100px 0px', // margem superior e inferior de 200px
       threshold: 0 // ativa assim que entra nessa margem
     });
 
@@ -250,7 +218,6 @@ export default class StorixPhotos extends LitElement {
     return html`
       <li>
         <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
-
         ${ item.type === 'video' ? html`
           <div class="video-container">
             <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
@@ -258,7 +225,6 @@ export default class StorixPhotos extends LitElement {
             </paper-button>
           </div>
         ` : '' }
-
       </li>
     `;
 

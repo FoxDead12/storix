@@ -21,7 +21,7 @@ export default class FileOps extends Job {
         'description',
         'extension',
         'size',
-        'birthtime',
+        "to_char(birthtime, 'YYYY-MM-DD') as birthtime_date",
         'folder_id',
         'type'
       ],
