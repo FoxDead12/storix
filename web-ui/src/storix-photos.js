@@ -229,10 +229,14 @@ export default class StorixPhotos extends LitElement {
 
     element.src = `fs/files/${item.uuid}`;
     element.loading = "lazy";
-    element.preload = "none";
     element.controls = true;
     element.autoplay = true;
-    element.addEventListener('blur', () => element.remove());
+    element.addEventListener('blur', () => {
+      element.pause();
+      element.removeAttribute('src'); // remove a origem
+      element.load(); // força reset do player
+      element.remove(); // agora pode remover do DOM
+    });
 
     e.currentTarget.parentElement.append(element);
 
