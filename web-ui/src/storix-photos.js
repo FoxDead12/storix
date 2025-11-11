@@ -18,8 +18,8 @@ export default class StorixPhotos extends LitElement {
       margin: 0px;
       gap: 1rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      grid-auto-rows: 100px;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      grid-auto-rows: 80px;
       overflow-y: auto;
     }
 
@@ -138,10 +138,27 @@ export default class StorixPhotos extends LitElement {
 
     let idx = 0;
     for ( const item of result.response ) {
+      if ( item.separator ) continue;
 
-      if ( this.currentDate != item.birthtime_date ) {
-        this.currentDate = item.birthtime_date;
-        const separator = { separator: true, date: item.birthtime_date };
+      const date_day = item.birthtime_date;
+      const date_month = item.birthtime_date.slice(0, 7);
+      const date_year = item.birthtime_date.slice(0, 4);
+
+      if ( this.currentDay != date_day ) {
+        this.currentDay = date_day;
+        const separator = { separator: true, day: date_day };
+        result.response.splice(idx, 0, separator);
+      }
+
+      if ( this.currentMonth != date_month ) {
+        this.currentMonth = date_month;
+        const separator = { separator: true, month: date_month };
+        result.response.splice(idx, 0, separator);
+      }
+
+      if ( this.currentYear != date_year ) {
+        this.currentYear = date_year;
+        const separator = { separator: true, year: date_year };
         result.response.splice(idx, 0, separator);
       }
 
@@ -174,7 +191,7 @@ export default class StorixPhotos extends LitElement {
     img.style.height = '100%';
 
     if (isLandscape) {
-      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 2;');
+      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 3;');
     } else {
       parent.setAttribute('style', 'grid-column: span 2; grid-row: span 3;');
     }
