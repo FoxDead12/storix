@@ -168,7 +168,10 @@ export default class FsOps extends Job {
             exifDate.second
           );
 
-          file_stats.birthtime = new Date(utcTimestamp - tzOffsetMs);
+          const date = new Date(utcTimestamp - tzOffsetMs);
+          if (date && !isNaN(date)) {
+            file_stats.birthtime = date;
+          }
         }
       } catch (e) {}
 
@@ -255,7 +258,11 @@ export default class FsOps extends Job {
             exifDate.second
           );
 
-          file_stats.birthtime = new Date(utcTimestamp - tzOffsetMs);
+          const date = new Date(utcTimestamp - tzOffsetMs);
+          if (date && !isNaN(date)) {
+            file_stats.birthtime = date;
+          }
+
         }
       } catch (e) {}
 
@@ -271,7 +278,7 @@ export default class FsOps extends Job {
             '-frames:v', '1',
             '-f', 'image2',
             "-vcodec", "libwebp",
-            "-compression_level", "6",  // 0–6, sendo 6 o máximo
+            "-compression_level", "5",  // 0–6, sendo 6 o máximo
             "-qscale", "50",            // qualidade (0–100)
             file_thumbail_absolute
           ]);

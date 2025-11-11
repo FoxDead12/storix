@@ -1,4 +1,5 @@
 import http from 'http';
+import crypto from 'crypto';
 import LOGGER from './logger.js';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
@@ -131,7 +132,9 @@ export default class HTTP {
     }
 
     // ... get session object from redis ...
-    const session_obj = await this.redis.hGetAll(`user:token:${token}`);
+    const client_ip_hash = crypto.createHash('md5').update(req.headers['x-real-ip'], 'utf8').digest('hex');
+    const session_key = 'user:token:' + client_ip_hash + ':' + token;
+    const session_obj = await this.redis.hGetAll(session_key);
     if ( !session_obj || Object.keys(session_obj).length == 0 ) {
       throw new HTTPError('Unauthorized', 401);
     }

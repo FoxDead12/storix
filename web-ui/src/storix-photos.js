@@ -125,6 +125,13 @@ export default class StorixPhotos extends LitElement {
       object-fit: contain;
     }
 
+    .video-camera-icon {
+      color: var(--primary-color);
+      border-radius: 50%;
+      background: #fff;
+      padding: 8px;
+    }
+
   `;
 
   static properties = {
@@ -236,14 +243,15 @@ export default class StorixPhotos extends LitElement {
 
   renderItem (item) {
 
-
     return html`
       <li>
         <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
 
         ${ item.type === 'video' ? html`
           <div class="video-container">
-            <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" ></paper-button>
+            <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
+              <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
+            </paper-button>
           </div>
         ` : '' }
 

@@ -25,8 +25,13 @@ export default class Login extends Job {
     // ... create session token ...
     const token = await this.generateToken(user.id);
 
+    const client_ip = this.req.headers['x-real-ip'];
+    if ( !client_ip ) {
+      return this.reportError({message: "Authentication failed, can't read ip of client"});
+    }
+
     // ... add session to token ...
-    await this.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema);
+    await this.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema, client_ip);
 
     this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
     // this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`);
@@ -39,9 +44,10 @@ export default class Login extends Job {
     return `${user_id}-${hash}`;
   }
 
-  async addSessionToRedis (user_id, token, name, email, role_mask, schema) {
+  async addSessionToRedis (user_id, token, name, email, role_mask, schema, client_ip) {
 
-    const prefix = 'user:token:';
+    const client_ip_hash = crypto.createHash('md5').update(client_ip, 'utf8').digest('hex');
+    const prefix = 'user:token:' + client_ip_hash + ':';
     const redisKey = prefix + token;
 
     // ... delete user old sessions ...
@@ -58,6 +64,7 @@ export default class Login extends Job {
       email: email,
       role_mask: role_mask,
       schema: schema,
+      client_ip: client_ip,
       login_at: new Date().getTime()
     };
 
