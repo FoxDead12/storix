@@ -20,8 +20,6 @@ export default class StorixPhotos extends LitElement {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
       grid-auto-rows: 100px;
-
-      grid-auto-flow: dense;
       overflow-y: auto;
     }
 
@@ -42,6 +40,13 @@ export default class StorixPhotos extends LitElement {
       0 16px 16px hsl(0deg 0% 0% / 0.075);
       border-radius: 5px;
       overflow: hidden;
+    }
+
+    ul > .separator {
+      grid-column: 1/-1;
+      grid-row: span 1;
+      box-shadow: none;
+      background-color: transparent;
     }
 
     ul > li > img {
@@ -130,6 +135,19 @@ export default class StorixPhotos extends LitElement {
   async fetchPhotos () {
 
     const result = await app.broker.get('files?filter[p_photos]=true&page=' + this.page);
+
+    let idx = 0;
+    for ( const item of result.response ) {
+
+      if ( this.currentDate != item.birthtime_date ) {
+        this.currentDate = item.birthtime_date;
+        const separator = { separator: true, date: item.birthtime_date };
+        result.response.splice(idx, 0, separator);
+      }
+
+      idx++;
+    }
+
     this.items.push(...result.response);
     this.requestUpdate();
 
@@ -215,18 +233,26 @@ export default class StorixPhotos extends LitElement {
 
   renderItem (item) {
 
-    return html`
-      <li>
-        <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
-        ${ item.type === 'video' ? html`
-          <div class="video-container">
-            <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
-              <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
-            </paper-button>
-          </div>
-        ` : '' }
-      </li>
-    `;
+    if ( item.separator === true ) {
+      return html`
+        <li class="separator">
+      separator
+        </li>
+      `
+    } else {
+      return html`
+        <li>
+          <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
+          ${ item.type === 'video' ? html`
+            <div class="video-container">
+              <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
+                <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
+              </paper-button>
+            </div>
+          ` : '' }
+        </li>
+      `;
+    }
 
   }
 }

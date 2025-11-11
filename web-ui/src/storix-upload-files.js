@@ -25,12 +25,6 @@ export default class StorixUploadFiles extends StorixDialogPage {
       padding: 12px 16px;
     }
 
-
-    @media (max-width: 768px) {
-
-    }
-
-
     .dropzone > storix-icon {
       color: #ccc;
       width: 128px;
@@ -155,6 +149,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
   firstUpdated () {
     this.dropzone  = this.shadowRoot.getElementById('dropzone');
     this.inputFile = this.shadowRoot.getElementById('file');
+    this.button = this.shadowRoot.getElementById('search-files');
   }
 
   enter () {
@@ -187,7 +182,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
   }
 
   _filesUpload (e) {
-
+    this.inputFile.setAttribute('disabled', true);
     const files = e.target.files || e.dataTransfer.files
     for (const file of files ) {
       file.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
