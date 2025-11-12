@@ -207,24 +207,27 @@ export default class StorixUploadFiles extends StorixDialogPage {
       this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').indeterminate = false;
     }
 
-    xhr.onload = () => {
+    xhr.onload = (e) => {
       if ( xhr.status == 200 ) {
         this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = 100;
         this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').indeterminate = false;
         this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
       } else {
         this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+        app.toast.openToast({ message: e.message, status: 'error' });
       }
     };
 
-    xhr.onerror = () => {
+    xhr.onerror = (e) => {
       console.log("erro");
       this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+      app.toast.openToast({ message: e.message, status: 'error' });
     };
 
-    xhr.onabort = () => {
+    xhr.onabort = (e) => {
       console.log("ficheiro abortado");
       this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+      app.toast.openToast({ message: e.message, status: 'error' });
     };
 
     xhr.send(file);
