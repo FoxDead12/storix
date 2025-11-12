@@ -214,7 +214,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
         this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
       } else {
         this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-        app.toast.openToast({ message: e.message, status: 'error' });
+        app.toast.openToast({ message: e.currentTarget.statusText, status: 'error' });
       }
     };
 
