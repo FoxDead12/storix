@@ -193,7 +193,7 @@ export default class FsOps extends Job {
           case "image/jpeg":
             await image
                   .rotate()
-                  .resize({ width: 1200, withoutEnlargement: true })
+                  .resize({ width: 500, withoutEnlargement: true })
                   .toFormat('jpeg', { quality: 50 })
                   .toFile(file_thumbail_absolute);
                 break;
@@ -201,14 +201,14 @@ export default class FsOps extends Job {
             await image
                   .toFormat('png', { compressionLevel: 9 })
                   .rotate()
-                  .resize({ width: 1200, withoutEnlargement: true })
+                  .resize({ width: 500, withoutEnlargement: true })
                   .toFile(file_thumbail_absolute);
                 break;
           case "image/webp":
             await image
                   .toFormat('webp', { quality: 50 })
                   .rotate()
-                  .resize({ width: 1200, withoutEnlargement: true })
+                  .resize({ width: 500, withoutEnlargement: true })
                   .toFile(file_thumbail_absolute);
                 break;
           case "image/gif":
@@ -216,14 +216,14 @@ export default class FsOps extends Job {
             await image
                   .toFormat('gif', { effort: 7 })
                   .rotate()
-                  .resize({ width: 1200, withoutEnlargement: true })
+                  .resize({ width: 500, withoutEnlargement: true })
                   .toFile(file_thumbail_absolute);
                 break;
           case "image/avif":
             await image
                   .toFormat('avif', { quality: 60 })
                   .rotate()
-                  .resize({ width: 1200, withoutEnlargement: true })
+                  .resize({ width: 500, withoutEnlargement: true })
                   .toFile(file_thumbail_absolute);
                 break;
           default:
