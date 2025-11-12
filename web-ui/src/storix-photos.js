@@ -271,7 +271,7 @@ export default class StorixPhotos extends LitElement {
 
       const month_date = item.month ? new Date(item.month) : null;
       const day_date   = item.day ? new Date(item.day) : null;
-      console.log(month_date, day_date)
+
       return html`
         <li class="separator">
           ${ month_date ? html`<p class="month-title">${StorixText.months[month_date.getMonth()]} ${month_date.getFullYear()}</p>` : '' }
