@@ -1,6 +1,7 @@
 import { html, LitElement, css, render } from "lit";
 import { repeat } from 'lit/directives/repeat.js';
 import '../components/storix-icon.js';
+import StorixText from "../modules/storix-text.js";
 
 export default class StorixPhotos extends LitElement {
 
@@ -16,18 +17,22 @@ export default class StorixPhotos extends LitElement {
       list-style: none;
       padding: 0px;
       margin: 0px;
-      gap: 1rem;
+      gap: 0.5rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-      grid-auto-rows: 80px;
+      grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+      grid-auto-rows: 55px;
       overflow-y: auto;
+      scrollbar-width: none;
     }
 
+    ul::-webkit-scrollbar {
+      display: none;
+    }
 
     ul > li {
       position: relative;
-      grid-column: span 2;
-      grid-row: span 3;
+      grid-column: span 3;
+      grid-row: span 4;
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -65,6 +70,7 @@ export default class StorixPhotos extends LitElement {
     .video-container paper-button {
       width: 100%;
       height: 100%;
+      margin: 0;
     }
 
     video {
@@ -93,6 +99,22 @@ export default class StorixPhotos extends LitElement {
       padding: 8px;
     }
 
+
+    .month-title {
+      font-size: 28px;
+      font-weight: normal;
+      padding: 0px;
+      margin: 0;
+      padding-top: 20px;
+    }
+
+    .day-title {
+      font-size: 18px;
+      font-weight: normal;
+      padding: 0px;
+      margin: 0;
+      padding-top: 12px;
+    }
   `;
 
   static properties = {
@@ -135,41 +157,36 @@ export default class StorixPhotos extends LitElement {
   async fetchPhotos () {
 
     const result = await app.broker.get('files?filter[p_photos]=true&page=' + this.page);
+    const newItems = []
 
-    let idx = 0;
+    // ... generate separators ...
     for ( const item of result.response ) {
-      if ( item.separator ) continue;
 
       const date_day = item.birthtime_date;
       const date_month = item.birthtime_date.slice(0, 7);
-      const date_year = item.birthtime_date.slice(0, 4);
-
-      if ( this.currentDay != date_day ) {
-        this.currentDay = date_day;
-        const separator = { separator: true, day: date_day };
-        result.response.splice(idx, 0, separator);
-      }
 
       if ( this.currentMonth != date_month ) {
         this.currentMonth = date_month;
         const separator = { separator: true, month: date_month };
-        result.response.splice(idx, 0, separator);
+        newItems.push(separator);
       }
 
-      if ( this.currentYear != date_year ) {
-        this.currentYear = date_year;
-        const separator = { separator: true, year: date_year };
-        result.response.splice(idx, 0, separator);
+
+      if ( this.currentDay != date_day ) {
+        this.currentDay = date_day;
+        const separator = { separator: true, day: date_day };
+        newItems.push(separator);
       }
 
-      idx++;
+      newItems.push(item);
     }
 
-    this.items.push(...result.response);
+    // ... force lit to render all images ...
+    this.items.push(...newItems);
     this.requestUpdate();
-
     await this.updateComplete;
 
+    // ... after lit render ...
     if ( result.response.length < 20 ) {
       this._stopFetch = true;
     } else {
@@ -191,9 +208,9 @@ export default class StorixPhotos extends LitElement {
     img.style.height = '100%';
 
     if (isLandscape) {
-      parent.setAttribute('style', 'grid-column: span 4; grid-row: span 3;');
+      parent.setAttribute('style', 'grid-column: span 6; grid-row: span 4;');
     } else {
-      parent.setAttribute('style', 'grid-column: span 2; grid-row: span 3;');
+      parent.setAttribute('style', 'grid-column: span 3; grid-row: span 4;');
     }
 
     const observer = new IntersectionObserver((entries) => {
@@ -251,9 +268,14 @@ export default class StorixPhotos extends LitElement {
   renderItem (item) {
 
     if ( item.separator === true ) {
+
+      const month_date = item.month ? new Date(item.month) : null;
+      const day_date   = item.day ? new Date(item.day) : null;
+      console.log(month_date, day_date)
       return html`
         <li class="separator">
-      separator
+          ${ month_date ? html`<p class="month-title">${StorixText.months[month_date.getMonth()]} ${month_date.getFullYear()}</p>` : '' }
+          ${ day_date   ? html`<p class="day-title">${StorixText.days[day_date.getDay()]}, ${day_date.getDate().toString().padStart(2, 0)}/${(day_date.getMonth() + 1).toString().padStart(2, 0)}</p>` : '' }
         </li>
       `
     } else {
