@@ -282,7 +282,7 @@ export default class FsOps extends Job {
             '-f', 'image2',
             "-vcodec", "libwebp",
             "-compression_level", "5",  // 0–6, sendo 6 o máximo
-            "-qscale", "50",            // qualidade (0–100)
+            "-qscale", "60",            // qualidade (0–100)
             file_thumbail_absolute
           ]);
 

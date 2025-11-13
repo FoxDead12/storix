@@ -3,6 +3,7 @@ import StorixBroker from '../components/storix-broker.js';
 import '../components/storix-toast.js';
 import './storix-header.js'
 import './storix-photos.js';
+import './storix-preview.js'
 import '../components/storix-dialog/storix-dialog.js'
 
 export default class StorixApp extends LitElement {
@@ -70,6 +71,13 @@ export default class StorixApp extends LitElement {
     const component = document.createElement('storix-dialog');
     component.options = dialog;
     document.body.append(component);
+  }
+
+  openPreview (item) {
+    const preview = document.createElement("storix-preview");
+    preview.item = item;
+    this.shadowRoot.append(preview);
+
   }
 
 }

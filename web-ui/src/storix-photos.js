@@ -259,22 +259,8 @@ export default class StorixPhotos extends LitElement {
   }
 
   _showRealImage (e) {
-
-    console.log(e.currentTarget);
     const item = e.currentTarget.item;
-    const container = document.createElement('div');
-    const image = document.createElement('img');
-
-    container.setAttribute('style', `position: fixed; z-index: 1000; background: #333; width: 100%; height: 100%; top: 0px; left: 0px;`);
-    image.src = `/fs/files/${item.uuid}?filter[thumbnail]=true`;
-    setTimeout(() => {
-      image.src = `/fs/files/${item.uuid}`;
-    }, 0);
-    image.setAttribute('style', 'width: 600px;')
-
-    container.append(image);
-    document.body.append(container);
-
+    app.openPreview(item);
   }
 
   _renderVideo (e) {
@@ -317,7 +303,7 @@ export default class StorixPhotos extends LitElement {
 
           ${ item.type === 'video' ? html`
             <div class="video-container">
-              <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
+              <paper-button .item="${item}" >
                 <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
               </paper-button>
             </div>
