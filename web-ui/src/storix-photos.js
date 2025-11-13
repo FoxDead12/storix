@@ -36,22 +36,37 @@ export default class StorixPhotos extends LitElement {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #ccc;
-      box-shadow:
-      0 1px 1px hsl(0deg 0% 0% / 0.075),
-      0 2px 2px hsl(0deg 0% 0% / 0.075),
-      0 4px 4px hsl(0deg 0% 0% / 0.075),
-      0 8px 8px hsl(0deg 0% 0% / 0.075),
-      0 16px 16px hsl(0deg 0% 0% / 0.075);
       border-radius: 5px;
       overflow: hidden;
+    }
+
+    .image-container {
+      box-shadow:
+        0 1px 1px hsl(0deg 0% 0% / 0.075),
+        0 2px 2px hsl(0deg 0% 0% / 0.075),
+        0 4px 4px hsl(0deg 0% 0% / 0.075),
+        0 8px 8px hsl(0deg 0% 0% / 0.075),
+        0 16px 16px hsl(0deg 0% 0% / 0.075);
+      background-color: #ccc;
+      cursor: pointer;
+    }
+
+    .image-container::before {
+      content: '';
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      height: 100%;
+      width: 100%;
+    }
+
+    .image-container:hover::before {
+      background-color: rgba(0, 0, 0, 0.2);
     }
 
     ul > .separator {
       grid-column: 1/-1;
       grid-row: span 1;
-      box-shadow: none;
-      background-color: transparent;
     }
 
     ul > li > img {
@@ -243,11 +258,27 @@ export default class StorixPhotos extends LitElement {
     }
   }
 
+  _showRealImage (e) {
+
+    console.log(e.currentTarget);
+    const item = e.currentTarget.item;
+    const container = document.createElement('div');
+    const image = document.createElement('img');
+
+    container.setAttribute('style', `position: fixed; z-index: 1000; background: #333; width: 100%; height: 100%; top: 0px; left: 0px;`);
+    image.src = `/fs/files/${item.uuid}`
+    image.setAttribute('style', 'width: 600px;')
+
+    container.append(image);
+    document.body.append(container);
+
+  }
+
   _renderVideo (e) {
     const item = e.currentTarget.item;
     const element = document.createElement('video');
 
-    element.src = `fs/files/${item.uuid}`;
+    element.setAttribute('src', `fs/files/${item.uuid}`);
     element.loading = "lazy";
     element.controls = true;
     element.autoplay = true;
@@ -268,20 +299,19 @@ export default class StorixPhotos extends LitElement {
   renderItem (item) {
 
     if ( item.separator === true ) {
-
       const month_date = item.month ? new Date(item.month) : null;
       const day_date   = item.day ? new Date(item.day) : null;
-
       return html`
         <li class="separator">
           ${ month_date ? html`<p class="month-title">${StorixText.months[month_date.getMonth()]} ${month_date.getFullYear()}</p>` : '' }
           ${ day_date   ? html`<p class="day-title">${StorixText.days[day_date.getDay()]}, ${day_date.getDate().toString().padStart(2, 0)}/${(day_date.getMonth() + 1).toString().padStart(2, 0)}</p>` : '' }
         </li>
-      `
+      `;
     } else {
       return html`
-        <li>
+        <li class="image-container" @click=${this._showRealImage.bind(this)} .item=${item} >
           <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
+
           ${ item.type === 'video' ? html`
             <div class="video-container">
               <paper-button @click="${this._renderVideo.bind(this)}" .item="${item}" >
@@ -289,6 +319,7 @@ export default class StorixPhotos extends LitElement {
               </paper-button>
             </div>
           ` : '' }
+
         </li>
       `;
     }

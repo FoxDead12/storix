@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import { fileTypeFromFile } from 'file-type';
 import { spawn } from "node:child_process";
 import { exiftool } from 'exiftool-vendored';
+import { finished } from 'stream/promises';
 
 export default class FsOps extends Job {
 
@@ -78,11 +79,13 @@ export default class FsOps extends Job {
     }
 
     // ... upload all file to client ...
-    stream.pipe(this.res);
     stream.on('error', (e) => {
       this.logger.error(e);
       return this.reportError({ message: "Error append reading file"});
     });
+
+    stream.pipe(this.res);
+    await finished(stream);
 
   }
 
