@@ -58,6 +58,7 @@ export default class StorixPreview extends LitElement {
       border-radius: 50%;
       background-color: rgba(0, 0, 0, .7);
       margin: 0px 24px;
+      z-index: 10;
     }
 
   `;
@@ -65,11 +66,21 @@ export default class StorixPreview extends LitElement {
   static properties = {
     item: {
       typeof: Object
+    },
+    _renderImage: {
+      typeof: Boolean
+    },
+    _renderVideo: {
+      typeof: Boolean
+    },
+    _hideVideo: {
+      typeof: Boolean
     }
   }
 
   constructor () {
     super();
+    this._resetStates();
   }
 
   render () {
@@ -77,12 +88,13 @@ export default class StorixPreview extends LitElement {
       <dialog id="dialog">
 
         <div class="actions-preview">
-          <paper-button><storix-icon icon="arrow-left" ></storix-icon></paper-button>
+          <paper-button @click=${this.buttonPrevious.bind(this)}><storix-icon icon="arrow-left" ></storix-icon></paper-button>
           <paper-button @click=${this.buttonNext.bind(this)} ><storix-icon icon="arrow-right" ></storix-icon></paper-button>
         </div>
 
         <div id="content-container">
-          <img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />
+          ${ this._renderImage == true ? html`<img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
+          ${ this._renderVideo == true ? html`<video src="/fs/files/${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
         </div>
 
       </dialog>
@@ -105,39 +117,83 @@ export default class StorixPreview extends LitElement {
     this.remove();
   }
 
+  _resetStates () {
+    this._renderImage = true;
+    this._renderVideo = false;
+    this._hideVideo = true;
+  }
+
   _imageLoad (e) {
 
     // ... parse data from event ...
     const img = e.currentTarget;
     const src = img.src;
 
+    // ... thumbails was loaded ...
     if ( src && src.endsWith('filter[thumbnail]=true') ) {
-
       if ( this.item.type === 'image' ) {
         img.classList.remove('thumbnail');
-        return img.setAttribute('src', `/fs/files/${this.item.uuid}`);
+        img.setAttribute('src', `/fs/files/${this.item.uuid}`);
+        return;
       }
-
       if ( this.item.type === 'video' ) {
-        return render(html`<video src="fs/files/${this.item.uuid}" controls hidden @loadedmetadata=${this._videoLoad.bind(this)}></video>`, this.contentContainer);
+        this._renderVideo = true;
       }
-
     }
 
   }
 
   _videoLoad (e) {
-    const video = e.currentTarget;
-    e.currentTarget.parentElement.querySelector('img').remove();
-    video.removeAttribute('hidden');
+    this._renderImage = false;
+    this._hideVideo = false;
   }
 
   buttonNext (e) {
-    console.log("LUL")
+    if ( !app.photos ) return;
+    this._resetStates();
+
+    let next_item_found = false;
+    let item = null;
+    let index_current_item = app.photos.findIndex(item => item.uuid === this.item.uuid);
+
+    index_current_item += 1;
+    do {
+      item = app.photos[index_current_item];
+      if (!item) return;
+
+      if ( item.separator === true ) {
+        next_item_found = false;
+        index_current_item += 1;
+      } else {
+        next_item_found = true;
+      }
+    } while (next_item_found == false);
+
+    this.item = item;
   }
 
   buttonPrevious () {
+    if ( !app.photos ) return;
+    this._resetStates();
 
+    let next_item_found = false;
+    let item = null;
+    let index_current_item = app.photos.findIndex(item => item.uuid === this.item.uuid);
+
+    index_current_item -= 1;
+    do {
+      item = app.photos[index_current_item];
+      if (!item) return;
+
+      if ( item.separator === true ) {
+        next_item_found = false;
+        index_current_item -= 1;
+      } else {
+        next_item_found = true;
+      }
+    } while (next_item_found == false);
+
+    this.item = item;
   }
 
 }
