@@ -80,12 +80,9 @@ export default class StorixPhotos extends LitElement {
       top: 0px;
       width: 100%;
       height: 100%;
-    }
-
-    .video-container paper-button {
-      width: 100%;
-      height: 100%;
-      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     video {
@@ -258,31 +255,9 @@ export default class StorixPhotos extends LitElement {
     }
   }
 
-  _showRealImage (e) {
+  _showPreview (e) {
     const item = e.currentTarget.item;
     app.openPreview(item);
-  }
-
-  _renderVideo (e) {
-    const item = e.currentTarget.item;
-    const element = document.createElement('video');
-
-    element.setAttribute('src', `fs/files/${item.uuid}`);
-    element.loading = "lazy";
-    element.controls = true;
-    element.autoplay = true;
-    element.addEventListener('blur', () => {
-      element.pause();
-      element.removeAttribute('src'); // remove a origem
-      element.load(); // força reset do player
-      element.remove(); // agora pode remover do DOM
-    });
-
-    e.currentTarget.parentElement.append(element);
-
-    setTimeout(() => {
-      element.focus();
-    }, 100);
   }
 
   renderItem (item) {
@@ -298,14 +273,12 @@ export default class StorixPhotos extends LitElement {
       `;
     } else {
       return html`
-        <li class="image-container" @click=${this._showRealImage.bind(this)} .item=${item} >
+        <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item} >
           <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
 
           ${ item.type === 'video' ? html`
             <div class="video-container">
-              <paper-button .item="${item}" >
-                <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
-              </paper-button>
+              <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
             </div>
           ` : '' }
 

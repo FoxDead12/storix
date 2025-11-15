@@ -1,38 +1,63 @@
 import { css, html, LitElement, render } from "lit";
+import '@polymer/paper-button/paper-button.js';
+import '../components/storix-icon.js';
 
 export default class StorixPreview extends LitElement {
 
   static styles = css`
 
-    dialog::backdrop {
-      content: "";
+    dialog {
       position: fixed;
-      inset: 0px;
-      background: rgba(0, 0, 0, .4);
-      backdrop-filter: blur(5px);
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      z-index: 10000;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      outline: none;
     }
 
-    dialog {
-      background-color: transparent;
-      border: none;
-      object-fit: cover;
-      outline: none;
+    dialog:modal {
+      max-width: 100vw;
+      max-height: 100vw;
     }
 
     img {
       object-fit: contain;
-      width: 1000px;
-      max-height: 1000px
+      width: 100vw;
+      height: 100vh;
     }
 
     video {
       object-fit: contain;
-      max-width: 1000px;
-      max-height: 1000px
+      max-width: 100vw;
+      height: 100vh;
     }
 
-    .thumbnail {
-      width: 1000px;
+    .actions-preview {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    paper-button {
+      color: #fff;
+      width: 50px;
+      height: 50px;
+      min-width: 0px !important;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, .7);
+      margin: 0px 24px;
     }
 
   `;
@@ -50,9 +75,20 @@ export default class StorixPreview extends LitElement {
   render () {
     return html`
       <dialog id="dialog">
+
+        <div class="actions-preview">
+          <paper-button>
+            <storix-icon icon="arrow-left" ></storix-icon>
+          </paper-button>
+          <paper-button>
+            <storix-icon icon="arrow-right" ></storix-icon>
+          </paper-button>
+        </div>
+
         <div id="content-container">
           <img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />
         </div>
+
       </dialog>
     `
   }
