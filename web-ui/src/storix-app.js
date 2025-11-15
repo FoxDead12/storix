@@ -77,7 +77,6 @@ export default class StorixApp extends LitElement {
     const preview = document.createElement("storix-preview");
     preview.item = item;
     this.shadowRoot.append(preview);
-
   }
 
 }

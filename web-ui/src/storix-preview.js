@@ -77,12 +77,8 @@ export default class StorixPreview extends LitElement {
       <dialog id="dialog">
 
         <div class="actions-preview">
-          <paper-button>
-            <storix-icon icon="arrow-left" ></storix-icon>
-          </paper-button>
-          <paper-button>
-            <storix-icon icon="arrow-right" ></storix-icon>
-          </paper-button>
+          <paper-button><storix-icon icon="arrow-left" ></storix-icon></paper-button>
+          <paper-button @click=${this.buttonNext.bind(this)} ><storix-icon icon="arrow-right" ></storix-icon></paper-button>
         </div>
 
         <div id="content-container">
@@ -94,13 +90,15 @@ export default class StorixPreview extends LitElement {
   }
 
   firstUpdated () {
+    // ... get elements of DOM ...
     this.dialog = this.shadowRoot.getElementById('dialog');
     this.contentContainer = this.shadowRoot.getElementById('content-container');
-    this.dialog.showModal();
 
-    this.dialog.addEventListener('cancel', (e) => {
-      this.close();
-    });
+    // ... event lister when cancel dialog 'ESC' ...
+    this.dialog.addEventListener('cancel', (e) => this.close());
+
+    // ... show dialog "open" ...
+    this.dialog.showModal();
   }
 
   close () {
@@ -132,7 +130,15 @@ export default class StorixPreview extends LitElement {
     const video = e.currentTarget;
     e.currentTarget.parentElement.querySelector('img').remove();
     video.removeAttribute('hidden');
-    console.log("remove")
+  }
+
+
+  buttonNext (e) {
+    console.log("LUL")
+  }
+
+  buttonPrevious () {
+
   }
 
 }

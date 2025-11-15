@@ -275,13 +275,7 @@ export default class StorixPhotos extends LitElement {
       return html`
         <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item} >
           <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
-
-          ${ item.type === 'video' ? html`
-            <div class="video-container">
-              <storix-icon class="video-camera-icon" icon="video-camera"></storix-icon>
-            </div>
-          ` : '' }
-
+          ${ item.type === 'video' ? html`<div class="video-container"><storix-icon class="video-camera-icon" icon="video-camera"></storix-icon></div>` : '' }
         </li>
       `;
     }
