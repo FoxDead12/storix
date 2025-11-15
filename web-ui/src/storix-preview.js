@@ -26,7 +26,7 @@ export default class StorixPreview extends LitElement {
 
     dialog:modal {
       max-width: 100vw;
-      max-height: 100vw;
+      max-height: 100vh;
     }
 
     img {
@@ -131,7 +131,6 @@ export default class StorixPreview extends LitElement {
     e.currentTarget.parentElement.querySelector('img').remove();
     video.removeAttribute('hidden');
   }
-
 
   buttonNext (e) {
     console.log("LUL")
