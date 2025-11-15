@@ -46,8 +46,18 @@ export default class StorixPreview extends LitElement {
       width: 100%;
       height: 100%;
       display: flex;
+      flex-direction: column;
+    }
+
+    .actions-preview > div {
+      width: 100%;
+      height: 50%;
+      display: flex;
       justify-content: space-between;
-      align-items: center;
+    }
+
+    .actions-preview > div:first-child {
+      padding: 16px 0px;
     }
 
     paper-button {
@@ -88,8 +98,13 @@ export default class StorixPreview extends LitElement {
       <dialog id="dialog">
 
         <div class="actions-preview">
-          <paper-button @click=${this.buttonPrevious.bind(this)}><storix-icon icon="arrow-left" ></storix-icon></paper-button>
-          <paper-button @click=${this.buttonNext.bind(this)} ><storix-icon icon="arrow-right" ></storix-icon></paper-button>
+          <div>
+            <paper-button @click=${this.close.bind(this)}><storix-icon icon="x-mark" ></storix-icon></paper-button>
+          </div>
+          <div>
+            <paper-button @click=${this.buttonPrevious.bind(this)}><storix-icon icon="arrow-left" ></storix-icon></paper-button>
+            <paper-button @click=${this.buttonNext.bind(this)} ><storix-icon icon="arrow-right" ></storix-icon></paper-button>
+          </div>
         </div>
 
         <div id="content-container">
