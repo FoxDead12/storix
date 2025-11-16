@@ -1,7 +1,8 @@
 import { html, LitElement, css, render } from "lit";
 import { repeat } from 'lit/directives/repeat.js';
-import '../components/storix-icon.js';
 import StorixText from "../modules/storix-text.js";
+import '../components/storix-icon.js';
+import '@polymer/paper-checkbox/paper-checkbox.js';
 
 export default class StorixPhotos extends LitElement {
 
@@ -64,6 +65,19 @@ export default class StorixPhotos extends LitElement {
       background-color: rgba(0, 0, 0, 0.2);
     }
 
+    .image-container > paper-checkbox {
+      position: absolute;
+      display: none;
+      left: 12px;
+      top: 12px;
+      z-index: 2;
+    }
+
+    .image-container:hover > paper-checkbox,
+    .image-container > paper-checkbox[active] {
+      display: block;
+    }
+
     ul > .separator {
       grid-column: 1/-1;
       grid-row: span 1;
@@ -72,6 +86,7 @@ export default class StorixPhotos extends LitElement {
     ul > li > img {
       object-fit: cover;
       color: transparent;
+      transition: 200ms all ease-in-out;
     }
 
     .video-container {
@@ -83,25 +98,6 @@ export default class StorixPhotos extends LitElement {
       display: flex;
       justify-content: center;
       align-items: center;
-    }
-
-    video {
-      position: absolute;
-      object-fit: cover;
-      left: 0px;
-      top: 0px;
-      width: 100%;
-      height: 100%;
-    }
-
-    video:-webkit-full-screen,
-    img:-webkit-full-screen {
-      object-fit: contain;
-    }
-
-    video:-moz-full-screen,
-    img:-moz-full-screen {
-      object-fit: contain;
     }
 
     .video-camera-icon {
@@ -136,6 +132,9 @@ export default class StorixPhotos extends LitElement {
     items: {
       typeof: Array
     },
+    selectedItems: {
+      typeof: Array
+    },
     page: {
       typeof: Number
     }
@@ -144,8 +143,10 @@ export default class StorixPhotos extends LitElement {
   constructor () {
     super();
     this.items = new Array();
+    this.selectedItems = new Array();
     this._stopFetch = false;
     this.page = 1;
+
     app.photos = this.items;
   }
 
@@ -261,6 +262,20 @@ export default class StorixPhotos extends LitElement {
     app.openPreview(item);
   }
 
+  _selectItemChange (e) {
+
+    const active = e.currentTarget.active;
+    const img = e.currentTarget.parentElement.querySelector('img');
+    const item = e.currentTarget.parentElement.item;
+
+    if ( active == true ) {
+      img.style.transform = "scale(0.8)";
+    } else {
+      img.style.transform = "scale(1)";
+    }
+
+  }
+
   renderItem (item) {
 
     if ( item.separator === true ) {
@@ -274,7 +289,8 @@ export default class StorixPhotos extends LitElement {
       `;
     } else {
       return html`
-        <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item} >
+        <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item}>
+          <paper-checkbox @click=${(e) => e.stopPropagation() } @change=${this._selectItemChange.bind(this)} ></paper-checkbox>
           <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
           ${ item.type === 'video' ? html`<div class="video-container"><storix-icon class="video-camera-icon" icon="video-camera"></storix-icon></div>` : '' }
         </li>
