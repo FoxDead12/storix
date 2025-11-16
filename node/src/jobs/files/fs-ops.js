@@ -50,6 +50,10 @@ export default class FsOps extends Job {
     let file = await this.db.query(`SELECT uuid, path, description, extension FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
     file = file.rows[0];
 
+    if ( !file ) {
+      return this.reportError({ message: "File don´t exist"});
+    }
+
     // filter[thumbnail]
     let file_aboslute = '';
     if ( this.job.params.hasOwnProperty('filter[thumbnail]') ) {
