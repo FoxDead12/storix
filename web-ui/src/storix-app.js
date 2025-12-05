@@ -2,9 +2,11 @@ import { html, css, LitElement } from 'lit';
 import StorixBroker from '../components/storix-broker.js';
 import '../components/storix-toast.js';
 import './storix-header.js'
-import './storix-photos.js';
 import './storix-preview.js'
 import '../components/storix-dialog/storix-dialog.js'
+
+import './storix-photos.js';
+import './storix-files.js'
 
 export default class StorixApp extends LitElement {
 
@@ -33,6 +35,7 @@ export default class StorixApp extends LitElement {
     return html `
       <storix-header></storix-header>
       <storix-photos></storix-photos>
+      <!-- <storix-files></storix-files> -->
       <storix-toast id="toast" ></storix-toast>
     `
   }

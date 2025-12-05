@@ -13,6 +13,7 @@ export class StorixIcon extends LitElement {
 
     svg {
       stroke-width: var(--icon-stroke-width, 1.5);
+      fill: var(--icon-fill, transparent);
     }
   `;
 

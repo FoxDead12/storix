@@ -16,6 +16,7 @@ export default class FileOps extends Job {
 
     let queryProps = {
       table: 'files',
+      join: '',
       attributes: [
         'uuid',
         'description',
@@ -35,8 +36,10 @@ export default class FileOps extends Job {
       // ... show only fotos and videos ...
       queryProps.filters.push("type IN ('image', 'video')");
 
-    } else {
+    } else if ( this.job.params.hasOwnProperty('filter[p_files]') ) {
       // ... show from directory ...
+      queryProps.filters.push("type = 'file'");
+      queryProps.join = ''
     }
 
     if ( this.job.params.hasOwnProperty('page') && Number(this.job.params['page']) > 1 ) {
@@ -45,6 +48,7 @@ export default class FileOps extends Job {
 
     const query = `
       SELECT ${queryProps.attributes.join(',')} FROM ${this.job.user_schema}.${queryProps.table}
+      ${queryProps.join}
       ${queryProps.filters.length > 0 ? `WHERE ${queryProps.filters.join(' AND ')}` : ''}
       ORDER BY ${queryProps.order_by}
       OFFSET ${queryProps.offset}

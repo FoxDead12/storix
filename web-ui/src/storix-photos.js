@@ -71,6 +71,7 @@ export default class StorixPhotos extends LitElement {
       left: 12px;
       top: 12px;
       z-index: 2;
+      --paper-checkbox-unchecked-color: #fff;
     }
 
     .image-container:hover > paper-checkbox,
@@ -87,6 +88,7 @@ export default class StorixPhotos extends LitElement {
       object-fit: cover;
       color: transparent;
       transition: 200ms all ease-in-out;
+      border-radius: 5px;
     }
 
     .video-container {
@@ -269,9 +271,9 @@ export default class StorixPhotos extends LitElement {
     const item = e.currentTarget.parentElement.item;
 
     if ( active == true ) {
-      img.style.transform = "scale(0.8)";
+      img.style.transform = "scale3d(0.95, 0.90, 0.90)";
     } else {
-      img.style.transform = "scale(1)";
+      img.style.transform = "scale3d(1, 1, 1)";
     }
 
   }
