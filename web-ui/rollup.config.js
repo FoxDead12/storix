@@ -4,6 +4,9 @@ import { fileURLToPath } from 'url';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import copy from 'rollup-plugin-copy';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const array = Object.fromEntries(
   globSync('src/**/*.js').map(file => [
@@ -22,7 +25,7 @@ const array = Object.fromEntries(
 export default {
 	input: array,
   output: {
-    dir: 'dist',
+    dir: process.env.BUILD_OUTPUT_DIR || 'dist',
     format: 'es',
     entryFileNames: '[name].js',
     chunkFileNames: '[name]-build.js'
