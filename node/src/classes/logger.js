@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { setInterval } from 'timers/promises';
 
 export default class LOGGER {
 
@@ -10,6 +11,7 @@ export default class LOGGER {
     this.daemon = config?.daemon != undefined ? config.daemon : true;
     this.file = null;
     this._open();
+    this._event();
   }
 
   info (message) {
@@ -34,6 +36,24 @@ export default class LOGGER {
     const message = `[${date}][${level.toUpperCase()}] ${context}`;
 
     this._write(message);
+
+  }
+
+  async _event () {
+
+    // ... calculate time to next mid night time ...
+    const now = new Date();
+    const next = new Date();
+    next.setHours(24, 0, 0, 0);
+
+    // ... calculate delay to timeoute ...
+    const delay = next - now;
+
+    // ... create event to execute in next midnigth ...
+    setTimeout(() => {
+      this._open();
+      this._event();
+    }, delay);
 
   }
 
