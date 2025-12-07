@@ -9,8 +9,6 @@ import DB from './db.js';
 import HTTPError from './http-error.js';
 import HELPER from './helper.js';
 
-// ... create logger to server ...
-global.logger = new LOGGER();
 
 export default class HTTP {
 
@@ -38,6 +36,9 @@ export default class HTTP {
 
     // ... load configuration of server ...
     this.config = new CONFIG(this.namespace).init();
+
+    // ... create logger to server ...
+    global.logger = new LOGGER(this.config);
 
     // ... load array of gatekeeper of server ...
     this.gatekeeper = new GATEKEEPER(this.namespace);
@@ -91,8 +92,6 @@ export default class HTTP {
       }
 
     }
-
-    global.logger.info(`${req.method} ${req.url} ${res.statusCode}`);
 
   }
 

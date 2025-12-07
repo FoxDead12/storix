@@ -1,4 +1,19 @@
 {
-  "port": 5001,
-  "host": "localhost"
+  "hlb": {
+    "port": 12002,
+    "host": "localhost",
+    "logger": {
+      "level": "info",
+      "directory": "/var/log/storix/broker/"
+    }
+  },
+  "M4.home": {
+    "port": 5001,
+    "host": "localhost",
+    "daemon": false,
+    "logger": {
+      "level": "info",
+      "directory": "/Users/dx3/Developer/storix/logs/broker/"
+    }
+  }
 }

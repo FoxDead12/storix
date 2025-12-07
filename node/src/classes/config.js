@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 export default class CONFIG {
 
@@ -8,9 +9,9 @@ export default class CONFIG {
   }
 
   init () {
-    global.logger.info('Loading config');
+    const hostname = os.hostname();
     var content = fs.readFileSync(this.filePath, 'utf8');
-    return JSON.parse(content);
+    return JSON.parse(content)[hostname];
   }
 
 }
