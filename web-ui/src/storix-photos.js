@@ -125,6 +125,21 @@ export default class StorixPhotos extends LitElement {
       margin: 0;
       padding-top: 12px;
     }
+
+
+    .empty-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: scroll;
+      height: 100%;
+    }
+
+    .icon-empty {
+      max-width: 650px;
+      width: 100%;
+      height: auto;
+    }
   `;
 
   static properties = {
@@ -153,10 +168,13 @@ export default class StorixPhotos extends LitElement {
   }
 
   render () {
+    this.items = []
     return html`
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
       </ul>
+
+      ${this.items.length == 0 ? this.renderEmptyList() : ''}
     `
   }
 
@@ -304,6 +322,15 @@ export default class StorixPhotos extends LitElement {
       `;
     }
 
+  }
+
+  renderEmptyList () {
+    return html`
+      <div class="empty-container">
+        <storix-icon class="icon-empty" icon="empty-list"></storix-icon>
+        <p>Don't exist nothing to show. Uplaod your files</p>
+      </div>
+    `
   }
 }
 
