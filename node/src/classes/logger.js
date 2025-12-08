@@ -59,9 +59,9 @@ export default class LOGGER {
   // ... method to open file to logger ...
   async _open () {
     const date = new Date();
-    this.file = path.join(this.dir, date.toISOString().slice(0, 10).replace(/-/g, '-').toString() + '.log');
     // ... create file if dont exist ...
     await fs.mkdir(this.dir, { recursive: true });
+    this.file = path.join(this.dir, date.toISOString().slice(0, 10).replace(/-/g, '-').toString() + '.log');
   }
 
   // ... method to write the messages in log file ...
