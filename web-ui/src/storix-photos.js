@@ -131,7 +131,6 @@ export default class StorixPhotos extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow: scroll;
       height: 100%;
     }
 
