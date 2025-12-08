@@ -11,6 +11,7 @@ export default class LOGGER {
     this.daemon = config?.daemon != undefined ? config.daemon : true;
     this.file = null;
     this._event();
+    this._clean();
   }
 
   info (message) {
@@ -50,6 +51,7 @@ export default class LOGGER {
 
     // ... create event to execute in next midnigth ...
     setTimeout(() => {
+      this._clean();
       this._open();
       this._event();
     }, delay);
@@ -75,6 +77,25 @@ export default class LOGGER {
     } else {
       await fs.writeFile(this.file, message + '\n', { flag: 'a+' });
     }
+  }
+
+  // ... method to clean old files ...
+  async _clean () {
+
+    // ... get list of files in directory ...
+    const files = await fs.readdir(this.dir);
+
+    const FIVE_DAYS = 5 * 24 * 60 * 60 * 1000;
+    const now = Date.now();
+
+    files.map(async file => {
+      const f = path.join(this.dir, file);
+      const stats = await fs.stat(f);
+      if ( (now - stats.mtime.getTime()) > FIVE_DAYS ) {
+        await fs.unlink(f);
+      }
+    });
+
   }
 
 }

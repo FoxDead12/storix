@@ -11,6 +11,7 @@
   "M4.home": {
     "port": 5001,
     "host": "localhost",
+    "daemon": true,
     "logger": {
       "level": "info",
       "directory": "/Users/dx3/Developer/storix/logs/broker/"

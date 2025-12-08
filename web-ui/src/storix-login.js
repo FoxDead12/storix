@@ -43,7 +43,7 @@ export default class StorixLogin extends LitElement {
 
     paper-input {
       font-family: 'Poppins';
-      color: var(--text-color);
+      --paper-input-container-input-color:  var(--text-color); /* azul */
     }
 
     paper-button {
@@ -75,13 +75,13 @@ export default class StorixLogin extends LitElement {
 
   render () {
     return html `
-      <form>
+      <form id="form" @submit=${this.login.bind(this)}>
         <h1>Login</h1>
         <paper-input id="email" label="Email *" ></paper-input>
         <paper-input id="password" type="${this._passwordIconState == true ? 'password' : 'text'}" label="Password *">
           <storix-icon slot="suffix" icon="${this._passwordIconState == true ? 'eye' : 'eye-slash'}" @click=${this._showIconState.bind(this)} ></storix-icon>
         </paper-input>
-        <paper-button raised @click=${this.login.bind(this)} >Enter</paper-button>
+        <paper-button raised @click=${() => {this.form.requestSubmit()}} >Enter</paper-button>
       </form>
 
       <storix-toast id="toast" ></storix-toast>
@@ -90,13 +90,18 @@ export default class StorixLogin extends LitElement {
 
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
+    this.form = this.shadowRoot.getElementById('form');
+    this.form.addEventListener("keydown", (e) => {
+      if (e.key === 'Enter') this.login(e);
+    })
   }
 
   _showIconState () {
     this._passwordIconState = !this._passwordIconState;
   }
 
-  async login () {
+  async login (e) {
+    e.preventDefault();
 
     try {
 
