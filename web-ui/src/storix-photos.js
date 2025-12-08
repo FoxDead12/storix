@@ -231,20 +231,25 @@ export default class StorixPhotos extends LitElement {
 
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
+        const img = entry.target;
+        const uuid = img.getAttribute('uuid');
         if (entry.isIntersecting) {
-          if ( img.src == window.location.href ) {
-            const uuid = img.getAttribute('uuid');
-            img.setAttribute('src', `/fs/files/${uuid}?filter[thumbnail]=true`);
+          // ... image are in viewport ...
+          if (img.dataset.loaded == "false") {
+            img.src = `/fs/files/${uuid}?filter[thumbnail]=true`;
+            img.dataset.loaded = "true";
           }
         } else {
-          img.setAttribute('src', ``);
+          // ... imare are not in viewport ...
+          const rect = entry.boundingClientRect;
+          const buffer = 1500;
+          if (rect.bottom < -buffer || rect.top > window.innerHeight + buffer) {
+            img.src = "";
+            img.dataset.loaded = "false";
+          }
         }
       });
-    },{
-      root: null, // null = viewport do browser
-      rootMargin: '100px 0px 100px 0px', // margem superior e inferior de 200px
-      threshold: 0 // ativa assim que entra nessa margem
-    });
+    }, { root: null, rootMargin: '300px 0px 300px 0px', threshold: 0 });
 
     observer.observe(img);
 

@@ -67,7 +67,7 @@ export default class StorixHeader extends LitElement {
     return html`
       <header>
 
-        <h5>Storix</h5>
+        <h5>Storix.</h5>
 
         <ul>
           <paper-button>

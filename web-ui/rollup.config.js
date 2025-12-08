@@ -8,6 +8,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const output_dir = process.env.BUILD_OUTPUT_DIR || 'dist';
+
 const array = Object.fromEntries(
   globSync('src/**/*.js').map(file => [
     // This removes `src/` as well as the file extension from each
@@ -25,7 +27,7 @@ const array = Object.fromEntries(
 export default {
 	input: array,
   output: {
-    dir: process.env.BUILD_OUTPUT_DIR || 'dist',
+    dir: output_dir,
     format: 'es',
     entryFileNames: '[name].js',
     chunkFileNames: '[name]-build.js'
@@ -38,10 +40,10 @@ export default {
     commonjs(),
     copy({
       targets: [
-        { src: '*.html', dest: 'dist' },
-        { src: '*.css', dest: 'dist' },
-        { src: '**/*.ttf', dest: 'dist/public/fonts' },
-        { src: '**/*.svg', dest: 'dist/public/svgs' },
+        { src: '*.html', dest: output_dir },
+        { src: '*.css', dest: output_dir },
+        { src: '**/*.ttf', dest: path.join(output_dir, 'public/fonts') },
+        { src: '**/*.svg', dest: path.join(output_dir, 'public/svgs') },
       ]
     })
   ]
