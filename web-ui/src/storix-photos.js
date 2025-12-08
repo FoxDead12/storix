@@ -167,7 +167,6 @@ export default class StorixPhotos extends LitElement {
   }
 
   render () {
-    this.items = []
     return html`
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
