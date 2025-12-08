@@ -44,6 +44,7 @@ export default {
         { src: '*.css', dest: output_dir },
         { src: '**/*.ttf', dest: path.join(output_dir, 'public/fonts') },
         { src: '**/*.svg', dest: path.join(output_dir, 'public/svgs') },
+        { src: '**/*.png', dest: path.join(output_dir, 'public/images') },
       ]
     })
   ]
