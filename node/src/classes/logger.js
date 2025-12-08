@@ -10,7 +10,6 @@ export default class LOGGER {
     this.level = this.levels.indexOf(config.logger.level);
     this.daemon = config?.daemon != undefined ? config.daemon : true;
     this.file = null;
-    this._open();
     this._event();
   }
 
@@ -67,6 +66,10 @@ export default class LOGGER {
 
   // ... method to write the messages in log file ...
   async _write (message) {
+    if ( !this.file ) {
+      await this._open();
+    }
+
     if ( this.daemon ) {
       console.log(message);
     } else {
