@@ -41,6 +41,7 @@ export default {
     copy({
       targets: [
         { src: '*.html', dest: output_dir },
+        { src: '*.txt', dest: output_dir },
         { src: '*.css', dest: output_dir },
         { src: '**/*.ttf', dest: path.join(output_dir, 'public/fonts') },
         { src: '**/*.svg', dest: path.join(output_dir, 'public/svgs') },
