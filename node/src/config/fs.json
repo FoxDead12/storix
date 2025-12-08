@@ -3,6 +3,7 @@
     "port": 12003,
     "host": "localhost",
     "upload_dir": "/home/homelb/.storix_uploads",
+    "daemon": false,
     "logger": {
       "mode": "info",
       "directory": "/var/log/storix/fs/"
@@ -12,7 +13,6 @@
     "port": 5002,
     "host": "localhost",
     "upload_dir": "/Users/dx3/Developer/storix-uploads",
-    "daemon": false,
     "logger": {
       "level": "info",
       "directory": "/Users/dx3/Developer/storix/logs/fs/"

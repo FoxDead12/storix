@@ -87,7 +87,7 @@ export default class HTTP {
       if ( e instanceof HTTPError ) {
         HELPER.reportError({ res: res, status: e.status, message: e.message });
       } else {
-        console.error(e);
+        global.logger.error(e.message);
         HELPER.reportError({ res: res, status: 500, message: 'Internal Server Error' });
       }
 

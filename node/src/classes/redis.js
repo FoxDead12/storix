@@ -19,7 +19,6 @@ export default class REDIS {
   }
 
   onError (err) {
-    console.error(err);
     global.logger.error(err);
   }
 
