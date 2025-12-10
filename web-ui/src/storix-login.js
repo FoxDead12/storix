@@ -42,14 +42,14 @@ export default class StorixLogin extends LitElement {
     }
 
     paper-input {
-      font-family: 'Poppins';
+      font-family: 'Poppins', sans-serif;
       --paper-input-container-input-color:  var(--text-color); /* azul */
     }
 
     paper-button {
       background-color: var(--primary-color);
       color: #fff;
-      font-family: 'Poppins';
+      font-family: 'Poppins', sans-serif;
       font-weight: bold;
       letter-spacing: 1px;
       margin: 0px;

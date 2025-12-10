@@ -27,7 +27,7 @@ export default class StorixHeader extends LitElement {
       margin: 0px;
       font-weight: bold;
       font-size: 24px;
-      font-family: 'Poppins';
+      font-family: 'Poppins', sans-serif;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
