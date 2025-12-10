@@ -10,7 +10,6 @@ export default class StorixPhotos extends LitElement {
     :host {
       overflow: hidden;
       height: 100%;
-      margin: 12px 16px;
     }
 
     ul {
@@ -116,6 +115,10 @@ export default class StorixPhotos extends LitElement {
       padding: 0px;
       margin: 0;
       padding-top: 20px;
+    }
+
+    .month-title:first-child {
+      padding-top: 0px;
     }
 
     .day-title {

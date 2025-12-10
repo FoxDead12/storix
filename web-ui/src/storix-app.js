@@ -17,6 +17,13 @@ export default class StorixApp extends LitElement {
       width: 100%;
       height: 100%;
     }
+
+    section {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 16px;
+      height: 100%;
+    }
   `
 
   constructor () {
@@ -34,14 +41,20 @@ export default class StorixApp extends LitElement {
   render () {
     return html `
       <storix-header></storix-header>
-      <storix-photos></storix-photos>
-      <!-- <storix-files></storix-files> -->
+      <section id="page-render">
+        <storix-photos></storix-photos>
+      </section>
       <storix-toast id="toast" ></storix-toast>
     `
   }
 
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
+    this.pageRender = this.shadowRoot.getElementById('page-render');
+
+    window.addEventListener('popstate', (e) => {
+      console.log("LUL")
+    })
   }
 
   // ********************************************* //
@@ -66,6 +79,11 @@ export default class StorixApp extends LitElement {
     await import(src);
   }
 
+  changeRoute (urlPath, props = "") {
+    window.history.pushState(props,"", urlPath);
+    this._renderRouteComponent(props.component);
+  }
+
   openToast (payload) {
     this.toast.openToast(payload);
   }
@@ -82,6 +100,13 @@ export default class StorixApp extends LitElement {
     this.shadowRoot.append(preview);
   }
 
+  async _renderRouteComponent (component) {
+    await this.importModule('./' + component + '.js');
+    const element = document.createElement(component);
+
+    this.pageRender.innerHTML = '';
+    this.pageRender.appendChild(element);
+  }
 }
 
 window.customElements.define('storix-app', StorixApp);

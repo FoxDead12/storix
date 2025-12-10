@@ -19,7 +19,7 @@ export default class StorixHeader extends LitElement {
       align-items: center;
       background-color: var(--primary-color);
       color: #fff;
-      padding: 12px 24px;
+      padding: 0px 24px;
     }
 
     h5 {
@@ -40,7 +40,7 @@ export default class StorixHeader extends LitElement {
       align-items: center;
     }
 
-    paper-button {
+    .menu-list > paper-button {
       min-width: 0 !important;
       padding: 0px;
       margin: 0px;
@@ -61,6 +61,25 @@ export default class StorixHeader extends LitElement {
       width: 24px;
       height: 24px;
     }
+
+    .navigation-list {
+      list-style: none;
+      padding: 0px;
+      margin: 0px;
+      gap: 0px;
+    }
+
+    .navigation-list li {
+      padding: 18px;
+      min-width: 60px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .navigation-list li:hover {
+      background-color: #fff;
+      color: var(--primary-color);
+    }
   `;
 
   render () {
@@ -69,7 +88,12 @@ export default class StorixHeader extends LitElement {
 
         <h5>Storix.</h5>
 
-        <ul>
+        <ul class="navigation-list">
+          <li @click=${() => this.linkClick('/gallery')} >Gallery</li>
+          <li @click=${() => this.linkClick('/files')} >Files</li>
+        </ul>
+
+        <ul class="menu-list">
           <paper-button>
             <storix-icon icon="plus" @click=${this._openWizardUpload.bind(this)}></storix-icon>
           </paper-button>
@@ -89,6 +113,10 @@ export default class StorixHeader extends LitElement {
       title: 'Upload your files',
       pages: ['storix-upload-files']
     });
+  }
+
+  linkClick (url, component) {
+    app.changeRoute(url);
   }
 
 }

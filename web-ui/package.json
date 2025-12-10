@@ -6,7 +6,7 @@
   "author": "",
   "type": "module",
   "scripts": {
-    "start": "web-dev-server --node-resolve --open --watch",
+    "start": "web-dev-server --node-resolve --open --watch --app-index index.html",
     "build": "rollup -c"
   },
   "dependencies": {
