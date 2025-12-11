@@ -1,6 +1,6 @@
 [
   {
-    "method": ["GET"],
+    "method": ["GET", "DELETE"],
     "route": "^/files(.+)?",
     "job": "fs-ops",
     "role_mask": "0x01"

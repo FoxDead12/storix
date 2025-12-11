@@ -84,9 +84,12 @@ export default class StorixFiles extends LitElement {
 
   render () {
     return html`
+
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
       </ul>
+      ${this.items.length == 0 ? this.renderEmptyList() : ''}
+
     `
   }
 
@@ -96,6 +99,7 @@ export default class StorixFiles extends LitElement {
 
 
   updated (changeProps) {
+    // .. some one change page, so is time to add load new items ...
     if ( changeProps.has('page') && !this._stopFetch) {
       this.fetchFiles();
     }
@@ -142,6 +146,15 @@ export default class StorixFiles extends LitElement {
       </li>
     `;
 
+  }
+
+  renderEmptyList () {
+    return html`
+      <div class="empty-container">
+        <storix-icon class="icon-empty" icon="empty-list"></storix-icon>
+        <p>Don't exist nothing to show. Uplaod your files</p>
+      </div>
+    `
   }
 }
 

@@ -31,6 +31,9 @@ export default class FsOps extends Job {
       case 'POST':
         await this.upload();
         break;
+      case 'DELETE':
+        await this.delete();
+        break;
       default:
         return this.reportError({status: 405, message: 'Method Not Allowed'});
     }
@@ -94,16 +97,15 @@ export default class FsOps extends Job {
   }
 
   async upload () {
-    // ... check get file name ...
+
+    // ... get file name from url params ...
     const file_name = this.job.params.file_name;
     const directory_id = Number(this.job.params.directory) || 0;
     if ( !file_name ) {
       return this.reportError({status: 400, message: "Is necessary indicate the file name"});
     }
 
-    // ... TODO, CHECK IF DIRECTORY EXIST ...
-
-    // ... generate uuid and path to file ...
+    // ... generate uuid (internal name of file) and path to file ...
     const uuid = crypto.randomUUID();
     const file_relative = path.join(this.job.user_schema, uuid);
     const file_absolute = path.join(this.config.upload_dir, file_relative);
@@ -120,6 +122,7 @@ export default class FsOps extends Job {
       this.req.pipe(writeStream);
       writeStream.on('finish', () => res());
 
+      // ... handle if error append ...
       writeStream.on('error', async (error) => {
         this.logger.error(error);
         this.req.unpipe(writeStream);
@@ -130,7 +133,9 @@ export default class FsOps extends Job {
         });
       });
 
+      // ... if process is aborted ...
       this.req.on("aborted", async () => {
+        this.logger.error(error);
         this.req.unpipe(writeStream);
         writeStream.destroy();
         writeStream.on('close', async () => {
@@ -146,6 +151,7 @@ export default class FsOps extends Job {
     // ... get real type extension of file ...
     const mime_type = await fileTypeFromFile(file_absolute);
 
+    // ... check if function get a mime type ...
     if ( !mime_type ) {
       // ... delete file ...
       await fs.unlink(file_absolute);
@@ -155,9 +161,10 @@ export default class FsOps extends Job {
     // ... check mime type to see each file type ...
     let file_type = null;
     if (mime_type.mime.startsWith('image/')) {
-
+      // ... is a image ...
       file_type = 'image';
 
+      // ... parse meta data from images ...
       try {
         // ... read content of image, to get birthdate ...
         const tags = await exiftool.read(file_absolute);
@@ -182,7 +189,7 @@ export default class FsOps extends Job {
         }
       } catch (e) {}
 
-
+      // ... create thumbail of image ...
       try {
 
         if ( !FsOps.imagesValideMimeTypes.includes(mime_type.mime) ) {
@@ -245,9 +252,10 @@ export default class FsOps extends Job {
       }
 
     } else if (mime_type.mime.startsWith('video/')) {
-
+      // ... is video ...
       file_type = 'video';
 
+      // ... get metadata from video ...
       try {
         // ... read content of image, to get birthdate ...
         const tags = await exiftool.read(file_absolute);
@@ -273,6 +281,7 @@ export default class FsOps extends Job {
         }
       } catch (e) {}
 
+      // ... create thumbnail of video ...
       try {
 
         await fs.mkdir(path.dirname(file_thumbail_absolute), { recursive: true });
@@ -314,7 +323,7 @@ export default class FsOps extends Job {
       file_type = 'file';
     }
 
-    // ... store in database ...
+    // ... store new file register in database ...
     const file = await this.db.query(`
       INSERT INTO ${this.job.user_schema}.files
       (uuid, type, extension, size, birthtime, path, description, folder_id) VALUES
@@ -331,6 +340,24 @@ export default class FsOps extends Job {
     ]);
 
     return this.sendResponse({ response: file.rows[0] });
+  }
+
+  async delete () {
+
+    // ... parse uuid from url ...
+    const match = this.req.url.match(/^\/files\/([A-Za-z0-9-]+)/);
+    const uuid = match[1];
+    if (!match || !match[1]) {
+      return this.reportError({ message: "Need indicate the uuid of file"});
+    }
+
+    // ... validate if existe the file in database ...
+
+    // ... delete file ...
+
+    // ... if is image or video delete thumbnail ...
+
+
   }
 
 }
