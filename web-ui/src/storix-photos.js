@@ -10,6 +10,7 @@ export default class StorixPhotos extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
+      flex: 1 1 auto;
     }
 
     ul {

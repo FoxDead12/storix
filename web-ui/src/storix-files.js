@@ -7,22 +7,29 @@ export default class StorixFiles extends LitElement {
   static styles = css`
     :host {
       overflow: hidden;
-      height: 100%;
-      margin: 12px 16px;
+      flex: 1 1 auto;
     }
 
     ul {
       max-height: 100%;
       list-style: none;
+
       padding: 0px;
       margin: 0px;
       gap: 0.5rem;
+
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
       grid-auto-rows: 90px;
-      overflow-y: auto;
+
+      overflow: scroll;
       scrollbar-width: none;
     }
+
+    ul::-webkit-scrollbar {
+      display: none;
+    }
+
 
     li {
       position: relative;
@@ -96,13 +103,15 @@ export default class StorixFiles extends LitElement {
 
   async fetchFiles () {
 
+    // ... request files from server ...
     const result = await app.broker.get('files?filter[p_files]=true&page=' + this.page);
     this.items.push(...result.response);
 
+    // ... make lit update DOM, and await DOM be ready ...
     this.requestUpdate();
     await this.updateComplete;
 
-    // ... after lit render ...
+    // ... check if is necessary keep render more data ...
     if ( result.response.length < 20 ) {
       this._stopFetch = true;
     } else {
