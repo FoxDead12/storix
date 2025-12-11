@@ -16,27 +16,24 @@ export default class StorixFiles extends LitElement {
       list-style: none;
       padding: 0px;
       margin: 0px;
-      gap: 1rem;
+      gap: 0.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+      grid-auto-rows: 90px;
       overflow-y: auto;
       scrollbar-width: none;
-      display: flex;
-      flex-wrap: wrap;
     }
 
     li {
-      flex: 1;
+      position: relative;
+      grid-column: span 1;
+      grid-row: span 1;
+      border-radius: 5px;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 12px 16px;
-      gap: 1rem;
-      border-radius: 5px;
-      transition: 300ms ease-in-out all;
-      cursor: pointer;
-
-      text-wrap: nowrap;
-
+      justify-content: space-between;
+      padding: 8px;
     }
 
     li:hover {
@@ -44,9 +41,10 @@ export default class StorixFiles extends LitElement {
     }
 
     li > storix-icon {
-      width: 64px;
-      height: 64px;
+      width: 48px;
+      height: 48px;
       --icon-stroke-width: 1;
+      margin: auto;
     }
 
     li > p {
@@ -54,6 +52,10 @@ export default class StorixFiles extends LitElement {
       margin: 0px;
       font-size: 14px;
       color: var(--text-color);
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
   `;

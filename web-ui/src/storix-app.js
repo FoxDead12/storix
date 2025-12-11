@@ -1,12 +1,10 @@
 import { html, css, LitElement } from 'lit';
 import StorixBroker from '../components/storix-broker.js';
+import StorixRoutes from '../modules/storix-routes.js';
 import '../components/storix-toast.js';
 import './storix-header.js'
 import './storix-preview.js'
 import '../components/storix-dialog/storix-dialog.js'
-
-import './storix-photos.js';
-import './storix-files.js'
 
 export default class StorixApp extends LitElement {
 
@@ -14,15 +12,19 @@ export default class StorixApp extends LitElement {
     :host {
       display: flex;
       flex-direction: column;
-      width: 100%;
-      height: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    storix-header {
+      flex: 0 0 auto; /* altura fixa (pega do próprio elemento) */
     }
 
     section {
-      display: flex;
-      flex-direction: column;
+      flex: 1 1 auto;
+      overflow: auto;
+      min-height: 0;
       padding: 12px 16px;
-      height: 100%;
     }
   `
 
@@ -31,6 +33,7 @@ export default class StorixApp extends LitElement {
     window.app   = this;
     this.broker  = new StorixBroker();
     this.session = new Object();
+    this.routes  = new StorixRoutes();
   }
 
   async connectedCallback () {
@@ -41,9 +44,7 @@ export default class StorixApp extends LitElement {
   render () {
     return html `
       <storix-header></storix-header>
-      <section id="page-render">
-        <storix-photos></storix-photos>
-      </section>
+      <section id="page-render"></section>
       <storix-toast id="toast" ></storix-toast>
     `
   }
@@ -52,8 +53,20 @@ export default class StorixApp extends LitElement {
     this.toast = this.shadowRoot.getElementById('toast');
     this.pageRender = this.shadowRoot.getElementById('page-render');
 
+    // ... set default url to start product ...
+    const setDefaultRoute = () => {
+      const pathname = window.location.pathname;
+      if ( !pathname || pathname == '' || pathname == '/' ) {
+        this.changeRoute('/gallery');
+      } else {
+        this.changeRoute(pathname);
+      }
+    }
+    setDefaultRoute();
+
+    // ... event to handle mouse backwards ...
     window.addEventListener('popstate', (e) => {
-      console.log("LUL")
+      setDefaultRoute();
     })
   }
 
@@ -79,9 +92,22 @@ export default class StorixApp extends LitElement {
     await import(src);
   }
 
-  changeRoute (urlPath, props = "") {
-    window.history.pushState(props,"", urlPath);
-    this._renderRouteComponent(props.component);
+  /**
+   *
+   * @param {String} urlPath '/gallery'
+   */
+  async changeRoute (urlPath) {
+
+    window.history.pushState({}, "", urlPath);
+
+    const url = new URL(urlPath, window.location.origin);
+    const component = this.routes.getComponentFromRoute(url.pathname);
+
+    await this.importModule(`./${component}.js`);
+    const element = document.createElement(component);
+
+    this.pageRender.innerHTML = '';
+    this.pageRender.appendChild(element);
   }
 
   openToast (payload) {
@@ -100,13 +126,6 @@ export default class StorixApp extends LitElement {
     this.shadowRoot.append(preview);
   }
 
-  async _renderRouteComponent (component) {
-    await this.importModule('./' + component + '.js');
-    const element = document.createElement(component);
-
-    this.pageRender.innerHTML = '';
-    this.pageRender.appendChild(element);
-  }
 }
 
 window.customElements.define('storix-app', StorixApp);

@@ -3,25 +3,28 @@ import { repeat } from 'lit/directives/repeat.js';
 import StorixText from "../modules/storix-text.js";
 import '../components/storix-icon.js';
 import '@polymer/paper-checkbox/paper-checkbox.js';
+import '../components/storix-actions.js'
 
 export default class StorixPhotos extends LitElement {
 
   static styles = css`
     :host {
       overflow: hidden;
-      height: 100%;
     }
 
     ul {
       max-height: 100%;
       list-style: none;
+
       padding: 0px;
       margin: 0px;
       gap: 0.5rem;
+
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
       grid-auto-rows: 55px;
-      overflow-y: auto;
+
+      overflow: scroll;
       scrollbar-width: none;
     }
 
@@ -117,10 +120,6 @@ export default class StorixPhotos extends LitElement {
       padding-top: 20px;
     }
 
-    .month-title:first-child {
-      padding-top: 0px;
-    }
-
     .day-title {
       font-size: 18px;
       font-weight: normal;
@@ -171,11 +170,14 @@ export default class StorixPhotos extends LitElement {
 
   render () {
     return html`
+
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
       </ul>
-
       ${this.items.length == 0 ? this.renderEmptyList() : ''}
+
+
+
     `
   }
 

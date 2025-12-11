@@ -89,8 +89,8 @@ export default class StorixHeader extends LitElement {
         <h5>Storix.</h5>
 
         <ul class="navigation-list">
-          <li @click=${() => this.linkClick('/gallery')} >Gallery</li>
-          <li @click=${() => this.linkClick('/files')} >Files</li>
+          <li @click=${() => app.changeRoute('/gallery')} >Gallery</li>
+          <li @click=${() => app.changeRoute('/files')} >Files</li>
         </ul>
 
         <ul class="menu-list">
@@ -113,10 +113,6 @@ export default class StorixHeader extends LitElement {
       title: 'Upload your files',
       pages: ['storix-upload-files']
     });
-  }
-
-  linkClick (url, component) {
-    app.changeRoute(url);
   }
 
 }
