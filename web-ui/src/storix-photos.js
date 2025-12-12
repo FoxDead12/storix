@@ -142,15 +142,22 @@ export default class StorixPhotos extends LitElement {
       width: 100%;
       height: auto;
     }
+
+    storix-actions > paper-button {
+      color: #fff;
+      margin: 0;
+    }
   `;
 
   static properties = {
     _stopFetch: {
       typeof: Boolean
     },
+    // ... this prop need be equal in all pages of project, the app will try catch ...
     items: {
       typeof: Array
     },
+    // ... this prop need be equal in all pages of project, the app will try catch ...
     selectedItems: {
       typeof: Array
     },
@@ -171,14 +178,10 @@ export default class StorixPhotos extends LitElement {
 
   render () {
     return html`
-
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
         ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
       </ul>
       ${this.items.length == 0 ? this.renderEmptyList() : ''}
-
-
-
     `
   }
 
@@ -299,9 +302,13 @@ export default class StorixPhotos extends LitElement {
 
     if ( active == true ) {
       img.style.transform = "scale3d(0.95, 0.90, 0.90)";
+      this.selectedItems.push(item);
     } else {
       img.style.transform = "scale3d(1, 1, 1)";
+      this.selectedItems = this.selectedItems.filter(i => i != item);
     }
+
+    window.dispatchEvent(new CustomEvent('selected-items-changed', { detail: null }));
 
   }
 

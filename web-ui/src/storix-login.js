@@ -58,6 +58,7 @@ export default class StorixLogin extends LitElement {
 
     storix-icon {
       cursor: pointer;
+      --icon-fill: var(--text-color);
     }
   `;
 

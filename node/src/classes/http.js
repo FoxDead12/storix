@@ -84,6 +84,11 @@ export default class HTTP {
 
     } catch (e) {
 
+      if (res.headersSent) {
+        global.logger.error('Response already sent to client, cannot report error again.');
+        return;
+      }
+
       if ( e instanceof HTTPError ) {
         HELPER.reportError({ res: res, status: e.status, message: e.message });
       } else {

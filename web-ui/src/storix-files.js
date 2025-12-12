@@ -65,6 +65,19 @@ export default class StorixFiles extends LitElement {
       overflow: hidden;
     }
 
+    .empty-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+    }
+
+    .icon-empty {
+      max-width: 650px;
+      width: 100%;
+      height: auto;
+    }
+
   `;
 
   static properties = {

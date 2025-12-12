@@ -89,8 +89,8 @@ export default class StorixDialog extends LitElement {
     }
 
     .header > paper-button > storix-icon {
-      width: 32px;
-      height: 32px;
+      --icon-width: 32px;
+      --icon-height: 32px;
       color: #fff;
     }
 
@@ -205,11 +205,15 @@ export default class StorixDialog extends LitElement {
 
   async nextClick (e) {
 
+    const button = e.currentTarget;
+    button.setAttribute('disabled', true);
+
     for ( const pageName of this._pages ) {
       const page = this.shadowRoot.querySelector(pageName);
       await page.save();
     }
 
+    button.removeAttribute('disabled');
 
   }
 

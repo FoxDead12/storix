@@ -57,7 +57,7 @@ export default class FileOps extends Job {
     `;
 
     const files = await this.db.query(query, []);
-    return this.sendResponse({ response: files.rows });
+    return this.sendResponse({ message: 'File deleted successfully', response: files.rows });
   }
 
 }

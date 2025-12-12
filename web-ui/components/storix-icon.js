@@ -5,15 +5,17 @@ export class StorixIcon extends LitElement {
 
   static styles = css`
     :host {
-      display: block;
-      width: 24px;
-      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--text-primary);
     }
 
     svg {
-      stroke-width: var(--icon-stroke-width, 1.5);
-      fill: var(--icon-fill, transparent);
+      width: var(--icon-width, 24px);
+      height: var(--icon-height, 24px);
+      stroke-width: var(--icon-stroke-width, 1);
+      fill: var(--icon-fill, #fff);
     }
   `;
 

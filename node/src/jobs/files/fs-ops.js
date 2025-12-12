@@ -352,11 +352,27 @@ export default class FsOps extends Job {
     }
 
     // ... validate if existe the file in database ...
+    let record = await this.db.query(`SELECT * FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
+    if ( record.rows.length < 1 ) {
+      return this.reportError({ message: "The file indicated don't exist"});
+    }
 
-    // ... delete file ...
+    record = record.rows[0];
 
-    // ... if is image or video delete thumbnail ...
+    // ... delete record ...
+    await this.db.query(`DELETE FROM ${this.job.user_schema}.files WHERE uuid = $1`, [uuid]);
 
+    // ... create paths to files, and delete files ...
+    const file_relative = path.join(this.job.user_schema, uuid);
+    const file_absolute = path.join(this.config.upload_dir, file_relative);
+    await fs.unlink(file_absolute);
+
+    if ( record.type == 'image' || record.type == 'video' ) {
+      const file_thumbail_absolute = path.join(this.config.upload_dir, this.job.user_schema, 'templates', uuid);
+      await fs.unlink(file_thumbail_absolute);
+    }
+
+    return this.sendResponse({ message: '' ,response: record });
 
   }
 

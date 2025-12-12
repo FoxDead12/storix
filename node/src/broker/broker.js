@@ -57,7 +57,7 @@ export default class Broker extends HTTP {
       job.params = Object.fromEntries(url.searchParams.entries());
     }
 
-    if (route.job == 'login') {
+    if (route.job == 'login' || route.job == 'register') {
       global.logger.info(`started job: ${route.job} method: ${req.method} email: ${job.body.email} `);
     } else {
       global.logger.info(`started job: ${route.job}, method: ${req.method}, job: ${JSON.stringify(job)}`);

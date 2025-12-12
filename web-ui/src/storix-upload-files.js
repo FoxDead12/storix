@@ -26,10 +26,9 @@ export default class StorixUploadFiles extends StorixDialogPage {
     }
 
     .dropzone > storix-icon {
-      color: #ccc;
-      width: 128px;
-      height: 128px;
-      --icon-stroke-width: 0.5;
+      --icon-width: 128px;
+      --icon-height: 128px;
+      --icon-fill: #ccc;
     }
 
     .dropzone > h5 {

@@ -46,20 +46,10 @@ export default class StorixHeader extends LitElement {
       margin: 0px;
       border-radius: 50%;
       aspect-ratio: 1 / 1;
-      width: 24px;
-      height: 24px;
     }
 
-    .user-icon {
-      width: 34px;
-      height: 34px;
-      background-color: #fff;
-      color: var(--primary-color);
-    }
-
-    storix-icon {
-      width: 24px;
-      height: 24px;
+    .menu-list > paper-button[disabled] {
+      opacity: 0.5;
     }
 
     .navigation-list {
@@ -82,6 +72,21 @@ export default class StorixHeader extends LitElement {
     }
   `;
 
+  static properties = {
+    disabeldShare: {
+      typeof: Boolean
+    },
+    disabledDelete: {
+      typeof: Boolean
+    }
+  }
+
+  constructor () {
+    super();
+    this.disabeldShare = true;
+    this.disabledDelete = true;
+  }
+
   render () {
     return html`
       <header>
@@ -97,14 +102,41 @@ export default class StorixHeader extends LitElement {
           <paper-button>
             <storix-icon icon="plus" @click=${this._openWizardUpload.bind(this)}></storix-icon>
           </paper-button>
-
-          <paper-button class="user-icon">
-            <storix-icon icon="user-cicle" ></storix-icon>
+          <paper-button ?disabled=${this.disabeldShare}>
+            <storix-icon icon="share" @click=${this._openWizardUpload.bind(this)}></storix-icon>
+          </paper-button>
+          <paper-button ?disabled=${this.disabledDelete} @click=${this._openDeleteFilesWizard.bind(this)}>
+            <storix-icon icon="trash"></storix-icon>
           </paper-button>
         </ul>
 
       </header>
     `;
+  }
+
+  firstUpdated () {
+    window.addEventListener('selected-items-changed', this._currentPageChangeSelectedItems.bind(this))
+    window.addEventListener('route-changed', this._appChangeRoute.bind(this))
+  }
+
+  // ... method fire in event when user select multi items in pages ...
+  _currentPageChangeSelectedItems (e) {
+    const page = app.currentPage;
+    const selectedItems = page.selectedItems;
+
+    if ( selectedItems.length > 0 ) {
+      this.disabeldShare = false;
+      this.disabledDelete = false;
+    } else {
+      this.disabeldShare = true;
+      this.disabledDelete = true;
+    }
+  }
+
+  // ... method fire in event when app change route ...
+  _appChangeRoute (e) {
+    this.disabeldShare = true;
+    this.disabledDelete = true;
   }
 
   _openWizardUpload () {
@@ -113,6 +145,17 @@ export default class StorixHeader extends LitElement {
       title: 'Upload your files',
       pages: ['storix-upload-files']
     });
+  }
+
+  // ... open wizard to delete selected files ...
+  _openDeleteFilesWizard () {
+    const items = app.currentPage.selectedItems;
+
+    app.openDialog({
+      items: items,
+      title: 'Delete Files',
+      pages: ['storix-delete-files']
+    })
   }
 
 }

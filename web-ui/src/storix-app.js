@@ -36,6 +36,7 @@ export default class StorixApp extends LitElement {
     this.broker  = new StorixBroker();
     this.session = new Object();
     this.routes  = new StorixRoutes();
+    this.currentPage = null;
   }
 
   async connectedCallback () {
@@ -107,9 +108,13 @@ export default class StorixApp extends LitElement {
 
     await this.importModule(`./${component}.js`);
     const element = document.createElement(component);
+    this.currentPage = element;
 
     this.pageRender.innerHTML = '';
     this.pageRender.appendChild(element);
+
+    window.dispatchEvent(new CustomEvent('route-changed', { detail: null }));
+
   }
 
   openToast (payload) {
@@ -126,6 +131,15 @@ export default class StorixApp extends LitElement {
     const preview = document.createElement("storix-preview");
     preview.item = item;
     this.shadowRoot.append(preview);
+  }
+
+  removeItem (item) {
+    const items = this.currentPage.items;
+    const index = items.indexOf(item);
+    if (index !== -1) {
+      items.splice(index, 1);
+      this.currentPage.requestUpdate();
+    }
   }
 
 }
