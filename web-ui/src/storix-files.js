@@ -69,14 +69,14 @@ export default class StorixFiles extends LitElement {
       display: flex;
       flex-direction: column;
       align-items: center;
-      height: 100%;
     }
 
     .icon-empty {
-      max-width: 650px;
-      width: 100%;
-      height: auto;
+      --icon-max-width: 650px;
+      --icon-width: 100%;
+      --icon-height: 100%;
     }
+
 
   `;
 

@@ -12,6 +12,7 @@ export class StorixIcon extends LitElement {
     }
 
     svg {
+      max-width: var(--icon-max-width, auto);
       width: var(--icon-width, 24px);
       height: var(--icon-height, 24px);
       stroke-width: var(--icon-stroke-width, 1);
