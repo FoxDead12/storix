@@ -122,6 +122,11 @@ export default class StorixDialog extends LitElement {
     }
   }
 
+  disconnectedCallback () {
+    super.disconnectedCallback();
+    this.dispatchEvent(new CustomEvent('close', { detail: null }));
+  }
+
   render () {
     return html`
       <dialog id="dialog">

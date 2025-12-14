@@ -178,7 +178,7 @@ export default class StorixPhotos extends LitElement {
   render () {
     return html`
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
-        ${repeat(this.items, (items) => items.id, this.renderItem.bind(this))}
+        ${repeat(this.items, (items) => items.uuid, this.renderItem.bind(this))}
       </ul>
       ${this.items.length == 0 ? this.renderEmptyList() : ''}
     `
@@ -191,6 +191,10 @@ export default class StorixPhotos extends LitElement {
   updated (changeProps) {
     if ( changeProps.has('page') && !this._stopFetch) {
       this.fetchPhotos();
+    }
+
+    if ( changeProps.has('selectedItems') ) {
+      window.dispatchEvent(new CustomEvent('selected-items-changed', { detail: null }));
     }
   }
 
@@ -295,19 +299,23 @@ export default class StorixPhotos extends LitElement {
 
   _selectItemChange (e) {
 
+    // ... get necessary props ...
     const active = e.currentTarget.active;
-    const img = e.currentTarget.parentElement.querySelector('img');
-    const item = e.currentTarget.parentElement.item;
+    const img    = e.currentTarget.parentElement.querySelector('img');
+    const item   = e.currentTarget.parentElement.item;
 
     if ( active == true ) {
       img.style.transform = "scale3d(0.95, 0.90, 0.90)";
+      // ... add item from array ...
       this.selectedItems.push(item);
+      this.requestUpdate('selectedItems');
     } else {
       img.style.transform = "scale3d(1, 1, 1)";
-      this.selectedItems = this.selectedItems.filter(i => i != item);
+      // ... remove item from array ...
+      const indice = this.selectedItems.indexOf(item);
+      this.selectedItems.splice(indice, 1);
+      this.requestUpdate('selectedItems');
     }
-
-    window.dispatchEvent(new CustomEvent('selected-items-changed', { detail: null }));
 
   }
 
@@ -325,9 +333,9 @@ export default class StorixPhotos extends LitElement {
     } else {
       return html`
         <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item}>
-          <paper-checkbox @click=${(e) => e.stopPropagation() } @change=${this._selectItemChange.bind(this)} ></paper-checkbox>
-          <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)} />
-          ${ item.type === 'video' ? html`<div class="video-container"><storix-icon class="video-camera-icon" icon="video-camera"></storix-icon></div>` : '' }
+          <paper-checkbox @click=${(e) => e.stopPropagation()} @change=${this._selectItemChange.bind(this)}></paper-checkbox>
+          <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)}/>
+          ${item.type === 'video' ? html`<div class="video-container"><storix-icon class="video-camera-icon" icon="video-camera"></storix-icon></div>` : ''}
         </li>
       `;
     }

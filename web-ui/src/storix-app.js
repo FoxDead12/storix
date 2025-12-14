@@ -121,10 +121,13 @@ export default class StorixApp extends LitElement {
     this.toast.openToast(payload);
   }
 
-  openDialog (dialog) {
+  async openDialog (dialog) {
     const component = document.createElement('storix-dialog');
     component.options = dialog;
     document.body.append(component);
+    await new Promise((res, rej) => {
+      component.addEventListener('close', () => res());
+    });
   }
 
   openPreview (item) {

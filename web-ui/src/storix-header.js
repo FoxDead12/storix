@@ -148,14 +148,14 @@ export default class StorixHeader extends LitElement {
   }
 
   // ... open wizard to delete selected files ...
-  _openDeleteFilesWizard () {
+  async _openDeleteFilesWizard () {
     const items = app.currentPage.selectedItems;
-
-    app.openDialog({
+    await app.openDialog({
       items: items,
       title: 'Delete Files',
       pages: ['storix-delete-files']
-    })
+    });
+    app.currentPage.selectedItems = new Array();
   }
 
 }
