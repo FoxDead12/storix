@@ -44,7 +44,7 @@ export default class FileOps extends Job {
     }
 
     if ( this.job.params.hasOwnProperty('page') && Number(this.job.params['page']) > 1 ) {
-      queryProps.offset = queryProps.limit * this.job.params['page'];
+      queryProps.offset = queryProps.limit * (this.job.params['page'] - 1);
     }
 
     const query = `
@@ -56,6 +56,8 @@ export default class FileOps extends Job {
       LIMIT ${queryProps.limit}
     `;
 
+    console.log(queryProps);
+    this.logger.info(query);
     const files = await this.db.query(query, []);
     return this.sendResponse({ message: 'File deleted successfully', response: files.rows });
   }
