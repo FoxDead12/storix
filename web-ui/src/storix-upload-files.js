@@ -180,12 +180,12 @@ export default class StorixUploadFiles extends StorixDialogPage {
     this.inputFile.pointerenter();
   }
 
-  _filesUpload (e) {
+  async _filesUpload (e) {
     this.inputFile.setAttribute('disabled', true);
     const files = e.target.files || e.dataTransfer.files
     for (const file of files ) {
       file.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-      this._upload(file);
+      await this._upload(file);
       this.files = [...this.files ,file];
     }
 
