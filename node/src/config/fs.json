@@ -2,7 +2,7 @@
   "hlb": {
     "port": 12003,
     "host": "localhost",
-    "upload_dir": "/home/homelb/.storix_uploads",
+    "upload_dir": "/mnt/hdd/storix",
     "daemon": false,
     "logger": {
       "mode": "info",
@@ -12,7 +12,7 @@
   "M4.home": {
     "port": 5002,
     "host": "localhost",
-    "upload_dir": "/mnt/hdd/storix",
+    "upload_dir": "/Users/dx3/Developer/storix-uploads",
     "daemon": true,
     "logger": {
       "level": "info",
