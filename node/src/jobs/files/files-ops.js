@@ -56,8 +56,6 @@ export default class FileOps extends Job {
       LIMIT ${queryProps.limit}
     `;
 
-    console.log(queryProps);
-    this.logger.info(query);
     const files = await this.db.query(query, []);
     return this.sendResponse({ message: 'File deleted successfully', response: files.rows });
   }
