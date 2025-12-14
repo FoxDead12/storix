@@ -10,5 +10,11 @@
     "route": "^/upload(.+)?",
     "job": "fs-ops",
     "role_mask": "0x01"
+  },
+  {
+    "method": ["POST"],
+    "route": "^/download(.+)?",
+    "job": "download-ops",
+    "role_mask": "0x01"
   }
 ]

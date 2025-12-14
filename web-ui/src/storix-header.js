@@ -78,6 +78,9 @@ export default class StorixHeader extends LitElement {
     },
     disabledDelete: {
       typeof: Boolean
+    },
+    disabledDownload: {
+      typeof: Boolean
     }
   }
 
@@ -85,6 +88,7 @@ export default class StorixHeader extends LitElement {
     super();
     this.disabeldShare = true;
     this.disabledDelete = true;
+    this.disabledDownload = true;
   }
 
   render () {
@@ -102,8 +106,11 @@ export default class StorixHeader extends LitElement {
           <paper-button>
             <storix-icon icon="plus" @click=${this._openWizardUpload.bind(this)}></storix-icon>
           </paper-button>
+          <paper-button ?disabled=${this.disabledDownload} @click=${this._downloadFiles.bind(this)}>
+            <storix-icon icon="download"></storix-icon>
+          </paper-button>
           <paper-button ?disabled=${this.disabeldShare}>
-            <storix-icon icon="share" @click=${this._openWizardUpload.bind(this)}></storix-icon>
+            <storix-icon icon="share"></storix-icon>
           </paper-button>
           <paper-button ?disabled=${this.disabledDelete} @click=${this._openDeleteFilesWizard.bind(this)}>
             <storix-icon icon="trash"></storix-icon>
@@ -127,9 +134,11 @@ export default class StorixHeader extends LitElement {
     if ( selectedItems.length > 0 ) {
       this.disabeldShare = false;
       this.disabledDelete = false;
+      this.disabledDownload = false;
     } else {
       this.disabeldShare = true;
       this.disabledDelete = true;
+      this.disabledDownload = true;
     }
   }
 
@@ -137,6 +146,7 @@ export default class StorixHeader extends LitElement {
   _appChangeRoute (e) {
     this.disabeldShare = true;
     this.disabledDelete = true;
+    this.disabledDownload = true;
   }
 
   _openWizardUpload () {
@@ -155,6 +165,27 @@ export default class StorixHeader extends LitElement {
       title: 'Delete Files',
       pages: ['storix-delete-files']
     });
+    app.currentPage.selectedItems = new Array();
+  }
+
+  // ... download action, will download a zip file ...
+  async _downloadFiles () {
+    const items = app.currentPage.selectedItems;
+    const uuids = new Array();
+    for ( const item of items ) {
+      uuids.push(item.uuid);
+    }
+
+    const file = await fetch('../fs/download', { method: 'POST', body: JSON.stringify({items: uuids}) });
+    const blob = await file.blob();
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "download.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+
     app.currentPage.selectedItems = new Array();
   }
 

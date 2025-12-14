@@ -86,6 +86,7 @@ export default class HTTP {
 
       if (res.headersSent) {
         global.logger.error('Response already sent to client, cannot report error again.');
+        global.logger.error(e)
         return;
       }
 
