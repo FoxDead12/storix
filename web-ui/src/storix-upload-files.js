@@ -186,9 +186,10 @@ export default class StorixUploadFiles extends StorixDialogPage {
     for (const file of files ) {
       file.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
       this.files = [...this.files ,file];
+    }
+    for (const file of files ) {
       await this._upload(file);
     }
-
   }
 
   async _upload (file) {
