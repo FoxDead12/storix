@@ -40,6 +40,7 @@ export default class StorixDialog extends LitElement {
     }
 
     .pages-container {
+      box-sizing: border-box;
       padding: 12px 16px;
       margin: 0;
       width: 700px;
@@ -49,7 +50,7 @@ export default class StorixDialog extends LitElement {
 
     @media (max-width: 768px) {
       .pages-container {
-        width: auto;
+        width: 100%;
         min-height: 500px;
       }
     }

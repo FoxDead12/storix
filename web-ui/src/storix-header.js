@@ -70,6 +70,19 @@ export default class StorixHeader extends LitElement {
       background-color: #fff;
       color: var(--primary-color);
     }
+
+    @media (max-width: 768px) {
+      h5 {
+        display: none;
+      }
+
+      .navigation-list li {
+        padding: 18px 14px;
+        min-width: 40px;
+      }
+
+    }
+
   `;
 
   static properties = {

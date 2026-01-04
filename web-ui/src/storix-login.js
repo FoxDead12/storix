@@ -60,6 +60,13 @@ export default class StorixLogin extends LitElement {
       cursor: pointer;
       --icon-fill: var(--text-color);
     }
+
+    @media (max-width: 768px) {
+      form {
+        width: 80%;
+      }
+    }
+
   `;
 
   static properties  = {

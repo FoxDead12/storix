@@ -23,6 +23,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
       align-items: center;
       gap: 16px;
       padding: 12px 16px;
+      box-sizing: border-box;
     }
 
     .dropzone > storix-icon {
@@ -121,7 +122,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
 
   render() {
     return html`
-      <div id="dropzone" class="dropzone" @dragover=${this._dropzoneDragOver.bind(this)} @dragleave=${this._dropzoneDragLeave.bind(this)} @drop=${this._dropzoneDragDrop.bind(this)} style="max-height: ${this.clientHeight}px;">
+      <div id="dropzone" class="dropzone" @dragover=${this._dropzoneDragOver.bind(this)} @dragleave=${this._dropzoneDragLeave.bind(this)} @drop=${this._dropzoneDragDrop.bind(this)}>
 
         ${ this.files.length === 0
           ? html`

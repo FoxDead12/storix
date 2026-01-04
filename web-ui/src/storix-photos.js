@@ -146,6 +146,13 @@ export default class StorixPhotos extends LitElement {
       color: #fff;
       margin: 0;
     }
+
+    @media (max-width: 768px) {
+      .image-container > paper-checkbox {
+        display: block;
+      }
+    }
+
   `;
 
   static properties = {
