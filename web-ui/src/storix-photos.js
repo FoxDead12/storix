@@ -238,7 +238,7 @@ export default class StorixPhotos extends LitElement {
     await this.updateComplete;
 
     // ... after lit render ...
-    if ( result.response.length < 100 ) {
+    if ( result.response.length < 20 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {
