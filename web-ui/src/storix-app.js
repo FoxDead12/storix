@@ -5,6 +5,7 @@ import '../components/storix-toast.js';
 import './storix-header.js'
 import './storix-preview.js'
 import '../components/storix-dialog/storix-dialog.js'
+import StorixSession from './storix-session.js';
 
 export default class StorixApp extends LitElement {
 
@@ -40,7 +41,7 @@ export default class StorixApp extends LitElement {
   }
 
   async connectedCallback () {
-    await this._fetchUserSession();
+    await StorixSession.fetchSession();
     super.connectedCallback();
   }
 
@@ -53,6 +54,7 @@ export default class StorixApp extends LitElement {
   }
 
   firstUpdated () {
+    StorixSession.refreshToken();
     this.toast = this.shadowRoot.getElementById('toast');
     this.pageRender = this.shadowRoot.getElementById('page-render');
 
@@ -73,20 +75,6 @@ export default class StorixApp extends LitElement {
     })
   }
 
-  // ********************************************* //
-  // Session methods                               //
-  // ********************************************* //
-
-  async _fetchUserSession () {
-    try {
-      const data = await this.broker.get('session');
-      this.session.user_id    = data.response.id;
-      this.session.user_name  = data.response.name;
-      this.session.user_email = data.response.email;
-    } catch (e) {
-      window.location.href = '/login';
-    }
-  }
 
   // ********************************************* //
   // app methods                                   //

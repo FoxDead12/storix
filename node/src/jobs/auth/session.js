@@ -13,7 +13,13 @@ export default class Session extends Job {
       return this.reportError({message: "User not found"});
     }
 
-    this.sendResponse({ response: user.rows[0] });
+    const session = {
+      user_id: user.rows[0]["id"],
+      user_name: user.rows[0]["name"],
+      user_email: user.rows[0]["email"],
+    }
+
+    this.sendResponse({ response: session });
 
   }
 

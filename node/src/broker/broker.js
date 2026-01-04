@@ -17,7 +17,7 @@ export default class Broker extends HTTP {
           try {
             res(JSON.parse(Buffer.concat(body).toString()))
           } catch (e) {
-            rej(HTTPError('Invalid body of json', 400));
+            rej(new HTTPError('Invalid body of json', 400));
           }
         })
         .on('error', err => rej(err))

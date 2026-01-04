@@ -17,6 +17,12 @@
     "role_mask": "0x01"
   },
   {
+    "method": [ "PATCH" ],
+    "route": "^/session",
+    "job": "refresh-token",
+    "role_mask": "0x01"
+  },
+  {
     "method": [ "POST", "PATCH", "DELETE" ],
     "route": "^/folders(.+)?",
     "job": "folders-ops",

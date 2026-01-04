@@ -218,7 +218,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
         } else {
           this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
           app.toast.openToast({ message: e.currentTarget.statusText, status: 'error' });
-          reject(e);
+          rej(e);
         }
       };
 
@@ -226,14 +226,14 @@ export default class StorixUploadFiles extends StorixDialogPage {
         console.log("erro");
         this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
         app.toast.openToast({ message: e.message, status: 'error' });
-        reject(e);
+        rej(e);
       };
 
       xhr.onabort = (e) => {
         console.log("ficheiro abortado");
         this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
         app.toast.openToast({ message: e.message, status: 'error' });
-        reject(e);
+        rej(e);
       };
 
       xhr.send(file);
