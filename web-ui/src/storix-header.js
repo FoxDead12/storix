@@ -162,6 +162,7 @@ export default class StorixHeader extends LitElement {
     this.disabledDownload = true;
   }
 
+  // ... will open wizard to upload files ...
   _openWizardUpload () {
     app.openDialog({
       mode: 'no-footer',
@@ -183,6 +184,10 @@ export default class StorixHeader extends LitElement {
 
   // ... download action, will download a zip file ...
   async _downloadFiles () {
+    const message = `Tarefa em progresso, a baixar ${app.currentPage.selectedItems.length} ficheiro/s`
+
+    const toast = app.openToast({ message: message, no_duration: true })
+
     const items = app.currentPage.selectedItems;
     const uuids = new Array();
     for ( const item of items ) {
@@ -200,6 +205,8 @@ export default class StorixHeader extends LitElement {
     URL.revokeObjectURL(url);
 
     app.currentPage.selectedItems = new Array();
+
+    // toast.remove();
   }
 
 }

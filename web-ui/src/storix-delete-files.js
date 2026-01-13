@@ -102,6 +102,8 @@ export default class StorixDeleteFiles extends StorixDialogPage {
       app.removeItem(item);
     }
 
+    this.dialog.close()
+
   }
 
   async deleteItem (item) {

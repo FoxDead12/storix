@@ -6,6 +6,7 @@ import FileOps from "./files/files-ops.js"
 import Session from "./auth/session.js"
 import DownloadOps from "./files/download-ops.js"
 import RefreshToken from "./auth/refreshToken.js"
+import ShareOps from "./files/share-ops.js"
 
 export default {
   'login': Login,
@@ -15,5 +16,6 @@ export default {
   'files-ops': FileOps,
   'session': Session,
   'download-ops': DownloadOps,
-  'refresh-token': RefreshToken
+  'refresh-token': RefreshToken,
+  'share-ops': ShareOps
 }

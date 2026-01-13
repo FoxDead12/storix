@@ -25,7 +25,7 @@ export default class StorixToast extends LitElement {
       width: auto;
       min-width: 300px;
       position: relative;
-      padding: 6px 16px;
+      padding: 12px 18px;
       border-radius: 3px;
       border-left: 10px solid;
       cursor: pointer;
@@ -80,7 +80,7 @@ export default class StorixToast extends LitElement {
 
   `;
 
-  openToast ({ message, duration, status }) {
+  openToast ({ message, duration, status, no_duration }) {
 
     const element = document.createElement('div');
     const title = document.createElement('p');
@@ -104,8 +104,11 @@ export default class StorixToast extends LitElement {
 
     element.addEventListener('click', () => element.remove());
 
-    setTimeout(() => element.remove(), duration || 3000);
+    if ( !no_duration ) {
+      setTimeout(() => element.remove(), duration || 3000);
+    }
 
+    return element;
   }
 
 }

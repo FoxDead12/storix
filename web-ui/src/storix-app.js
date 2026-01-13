@@ -106,7 +106,7 @@ export default class StorixApp extends LitElement {
   }
 
   openToast (payload) {
-    this.toast.openToast(payload);
+    return this.toast.openToast(payload);
   }
 
   async openDialog (dialog) {
