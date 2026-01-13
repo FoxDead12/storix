@@ -36,7 +36,7 @@ export default class FS extends HTTP {
       job.params = Object.fromEntries(url.searchParams.entries());
     }
 
-    global.logger.info(`started job: ${route.job}, method: ${req.method}, job: ${JSON.stringify(job)}`);
+    global.logger.info(`started job: ${route.job}, method: ${req.method}, url: ${req.url}, job: ${JSON.stringify(job)}`);
     await (new job_instance_name(req, res, this)).perform(job);
     global.logger.info(`completed job: ${route.job}, method: ${req.method}, status: ${res.statusCode}`);
 
