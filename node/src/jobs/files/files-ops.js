@@ -30,7 +30,7 @@ export default class FileOps extends Job {
       filters: new Array(),
       order_by: 'birthtime DESC, create_at DESC',
       offset: 0,
-      limit: 20
+      limit: 100
     }
 
     if ( this.job.params.hasOwnProperty('filter[p_photos]') ) {

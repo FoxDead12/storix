@@ -238,7 +238,7 @@ export default class StorixPhotos extends LitElement {
     await this.updateComplete;
 
     // ... after lit render ...
-    if ( result.response.length < 20 ) {
+    if ( result.response.length < 100 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {
@@ -294,7 +294,7 @@ export default class StorixPhotos extends LitElement {
     if ( this._stopFetch ) return;
 
     const element = e.currentTarget;
-    if ( element.offsetHeight + element.scrollTop >= element.scrollHeight - 100 ) {
+    if ( element.offsetHeight + element.scrollTop >= element.scrollHeight - 300 ) {
       this.page += 1;
     }
   }

@@ -206,7 +206,7 @@ export default class StorixHeader extends LitElement {
 
     app.currentPage.selectedItems = new Array();
 
-    // toast.remove();
+    toast.remove();
   }
 
 }
