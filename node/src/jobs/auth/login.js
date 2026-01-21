@@ -1,7 +1,7 @@
 import Job from "../../classes/job.js";
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import ROLES from "../../classes/roles.js";
+import Session from "../../classes/session.js";
 
 export default class Login extends Job {
 
@@ -22,54 +22,25 @@ export default class Login extends Job {
       return this.reportError({message: "Authentication failed, invalid credentials"});
     }
 
-    // ... create session token ...
-    const token = await this.generateToken(user.id);
+    const access_token = Session.generate_access_token(user.id);
+    const refresh_token = Session.generate_refresh_token(user.id);
 
-    const client_ip = this.req.headers['x-real-ip'];
-    if ( !client_ip ) {
-      return this.reportError({message: "Authentication failed, can't read ip of client"});
-    }
+    await Session.add_to_redis(this.redis, {
+      user_id:      user.id,
+      user_name:    user.name,
+      user_email:   user.email,
+      user_schema:  user.u_schema,
+      user_roles:   ROLES.tranform_byte_to_hex(user.role_mask),
+      access_token: access_token,
+      refresh_token: refresh_token,
+      client_ip: this.req.headers['x-real-ip']
+    })
 
-    // ... add session to token ...
-    await this.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema, client_ip);
-
-    this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
-    // this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+    this.res.setHeader('Set-Cookie', [
+      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict`,
+      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict`
+    ]);
     this.sendResponse({ message: 'Authentication was successful' });
-
-  }
-
-  async generateToken (user_id) {
-    const hash = crypto.randomBytes(64).toString('base64')
-    return `${user_id}-${hash}`;
-  }
-
-  async addSessionToRedis (user_id, token, name, email, role_mask, schema, client_ip) {
-
-    const client_ip_hash = crypto.createHash('md5').update(client_ip, 'utf8').digest('hex');
-    const prefix = 'user:token:' + client_ip_hash + ':';
-    const redisKey = prefix + token;
-
-    // ... delete user old sessions ...
-    const redisUserKey = prefix + user_id + '-*';
-    const oldSessions = await this.redis.keys(redisUserKey);
-    if (oldSessions.length > 0) {
-      await this.redis.del(oldSessions);
-    }
-
-    // ... add new session to redis ...
-    const redisPayload = {
-      id: user_id,
-      name: name,
-      email: email,
-      role_mask: role_mask,
-      schema: schema,
-      client_ip: client_ip,
-      login_at: new Date().getTime()
-    };
-
-    await this.redis.hSet(redisKey, redisPayload);
-    await this.redis.expire(redisKey, 3600); // 1 - HOUR
 
   }
 

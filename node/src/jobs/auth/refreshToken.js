@@ -1,36 +1,56 @@
 import Job from "../../classes/job.js";
-import Login from "./login.js";
-import ROLES from "../../classes/roles.js";
+import HELPER from '../../classes/helper.js';
+import Session from "../../classes/session.js";
 
 export default class RefreshToken extends Job {
 
   async perform (job) {
 
-    // ... create class login because contain methods to generate new session ...
-    const loginClass = new Login(this.req, this.res, this.server);
-
-    // ... get user from id ...
-    let user = await this.db.query('SELECT id, name, email, encrypt_password, role_mask, u_schema FROM public.users WHERE id = $1 AND deleted = false', [job.user_id]);
-    if ( !user?.rows[0] ) {
-      return this.reportError({message: "Refresh failed, user don't exist"});
-    } else {
-      user = user.rows[0];
+    // ... parse regex token from HTTP cookies ...
+    const cookies = HELPER.parseCookies(this.req.headers.cookie);
+    if ( !cookies.refresh ) {
+      return this.reportError({message: "Refresh failed"});
     }
 
-    // ... generate new token ...
-    const token = await loginClass.generateToken(job.user_id);
-
-    const client_ip = this.req.headers['x-real-ip'];
-    if ( !client_ip ) {
-      return this.reportError({message: "Refresh failed, can't read ip of client"});
+    const regex_cookie = /^([A-Za-z0-9]+-[A-Za-z0-9+\/]{171}=)$/;
+    if ( !regex_cookie ) {
+      return this.reportError({message: "Refresh failed"});
     }
 
-    // ... add session to token ...
-    await loginClass.addSessionToRedis(user.id, token, user.name, user.email, ROLES.tranform_byte_to_hex(user.role_mask), user.u_schema, client_ip);
+    const match = cookies.refresh.match(regex_cookie);
+    if ( !match ) {
+      return this.reportError({message: "Refresh failed"});
+    }
 
-    this.res.setHeader('Set-Cookie', `token=${token}; Path=/; HttpOnly; SameSite=Strict`);
+    const token = match[0];
+    const redis_session = await Session.get_session(this.redis, token);
+    if ( !redis_session || Object.keys(redis_session).length == 0 ) {
+      // ... session expired ...
+      return this.reportError({message: "Refresh failed, session expired"});
+    }
+
+    const access_token = Session.generate_access_token(redis_session['user_id']);
+    const refresh_token = Session.generate_refresh_token(redis_session['user_id']);
+
+    await Session.add_to_redis(this.redis, {
+      user_id: redis_session['user_id'],
+      user_name: redis_session['user_name'],
+      user_email: redis_session['user_email'],
+      user_schema: redis_session['user_schema'],
+      user_roles: redis_session['user_role_mask'],
+      access_token: access_token,
+      refresh_token: refresh_token,
+      client_ip: this.req.headers['x-real-ip']
+    });
+
+    // ... delete old refresh token ...
+    await Session.delete_session(this.redis, token);
+
+    this.res.setHeader('Set-Cookie', [
+      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict`,
+      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict`
+    ]);
     this.sendResponse({ message: 'Refresh was successful' });
-
 
   }
 

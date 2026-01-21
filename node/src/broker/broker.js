@@ -44,8 +44,8 @@ export default class Broker extends HTTP {
     job.params  = new Object();
 
     if ( session ) {
-      job.user_id     = session.id;
-      job.user_schema = session.schema;
+      job.user_id     = session.user_id;
+      job.user_schema = session.user_schema;
     }
 
     if ( req.method === 'POST' || req.method === 'PATCH' ) {

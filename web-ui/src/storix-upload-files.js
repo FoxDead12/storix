@@ -194,51 +194,65 @@ export default class StorixUploadFiles extends StorixDialogPage {
   }
 
   async _upload (file) {
-    return new Promise((res, rej) => {
-      const uploadUrl = new URL('/fs/upload', window.origin);
-      uploadUrl.searchParams.append('file_name', file.name);
-      uploadUrl.searchParams.append('directory', 0);
+    const upload = async () => {
+      return new Promise((res, rej) => {
+        const uploadUrl = new URL('/fs/upload', window.origin);
+        uploadUrl.searchParams.append('file_name', file.name);
+        uploadUrl.searchParams.append('directory', 0);
 
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', uploadUrl);
-      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 
-      xhr.upload.onprogress = (e) => {
-        const progress = Math.round((e.loaded / e.total) * 100);
-        this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
-        this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').indeterminate = false;
-      }
-
-      xhr.onload = (e) => {
-        if ( xhr.status == 200 ) {
-          this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = 100;
+        xhr.upload.onprogress = (e) => {
+          const progress = Math.round((e.loaded / e.total) * 100);
+          this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = progress;
           this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').indeterminate = false;
-          this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
-          res();
-        } else {
-          this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-          app.toast.openToast({ message: e.currentTarget.statusText, status: 'error' });
-          rej(e);
         }
-      };
 
-      xhr.onerror = (e) => {
-        console.log("erro");
-        this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-        app.toast.openToast({ message: e.message, status: 'error' });
-        rej(e);
-      };
+        xhr.onload = (e) => {
+          if ( xhr.status == 200 ) {
+            this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').value = 100;
+            this.shadowRoot.getElementById(file.id.toString()).querySelector('paper-progress').indeterminate = false;
+            this.shadowRoot.getElementById(file.id.toString()).classList.add("success");
+            res();
+          } else if (xhr.status === 401) {
+            rej({ type: 'unauthorized', originalEvent: e });
+          } else {
+            this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+            app.toast.openToast({ message: e.currentTarget.statusText, status: 'error' });
+            rej(e);
+          }
+        };
 
-      xhr.onabort = (e) => {
-        console.log("ficheiro abortado");
-        this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
-        app.toast.openToast({ message: e.message, status: 'error' });
-        rej(e);
-      };
+        xhr.onerror = (e) => {
+          console.log("erro");
+          this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+          app.toast.openToast({ message: e.message, status: 'error' });
+          rej(e);
+        };
 
-      xhr.send(file);
-    })
+        xhr.onabort = (e) => {
+          console.log("ficheiro abortado");
+          this.shadowRoot.getElementById(file.id.toString()).classList.add("error");
+          app.toast.openToast({ message: e.message, status: 'error' });
+          rej(e);
+        };
 
+        xhr.send(file);
+      })
+    }
+
+    try {
+      return await upload();
+    } catch (e) {
+      if ( e?.type === 'unauthorized' ) {
+        await app.broker._refreshToken();
+        return await upload();
+      } else {
+        throw e
+      }
+    }
   }
 
   // -------------------------------------------------------------------- //

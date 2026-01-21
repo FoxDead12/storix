@@ -32,7 +32,7 @@ export class StorixIcon extends LitElement {
   async updated (changeProps) {
     if ( changeProps.has('icon') ) {
       const url = new URL(`/public/svgs/${this.icon}.svg`, window.location.origin);
-      fetch(url)
+      fetch(url, { cache: 'default' })
         .then((res) => res.text())
         .then((svg) => this.svg = svg);
     }

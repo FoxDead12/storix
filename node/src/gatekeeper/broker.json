@@ -18,10 +18,12 @@
   },
   {
     "method": [ "PATCH" ],
-    "route": "^/session",
-    "job": "refresh-token",
-    "role_mask": "0x01"
+    "route": "^/session-refresh",
+    "job": "refresh-token"
   },
+
+
+
   {
     "method": [ "POST", "PATCH", "DELETE" ],
     "route": "^/folders(.+)?",

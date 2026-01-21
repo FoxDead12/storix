@@ -1,5 +1,4 @@
 import http from 'http';
-import crypto from 'crypto';
 import LOGGER from './logger.js';
 import CONFIG from './config.js';
 import GATEKEEPER from './gatekeeper.js';
@@ -118,7 +117,6 @@ export default class HTTP {
 
     // ... token comming in cookies header ...
     } else if ( req?.headers?.cookie ) {
-
       const cookies = HELPER.parseCookies(req.headers.cookie);
       const regex_cookie = /^([A-Za-z0-9]+-[A-Za-z0-9+\/]{86}==)$/;
       if ( cookies?.token ) {
@@ -137,15 +135,14 @@ export default class HTTP {
     }
 
     // ... get session object from redis ...
-    const client_ip_hash = crypto.createHash('md5').update(req.headers['x-real-ip'], 'utf8').digest('hex');
-    const session_key = 'user:token:' + client_ip_hash + ':' + token;
+    const session_key = 'user:token:' + token;
     const session_obj = await this.redis.hGetAll(session_key);
     if ( !session_obj || Object.keys(session_obj).length == 0 ) {
       throw new HTTPError('Unauthorized', 401);
     }
 
     // ... check role mask from user and route ...
-    const role_mask = parseInt(session_obj.role_mask, 16);
+    const role_mask = parseInt(session_obj.user_role_mask, 16);
     if ( !(role_mask & route_mask) ) {
       throw new HTTPError('Forbidden', 403);
     }

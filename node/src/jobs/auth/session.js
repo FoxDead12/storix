@@ -14,9 +14,9 @@ export default class Session extends Job {
     }
 
     const session = {
-      user_id: user.rows[0]["id"],
-      user_name: user.rows[0]["name"],
-      user_email: user.rows[0]["email"],
+      user_id: user.rows[0]["user_id"],
+      user_name: user.rows[0]["user_name"],
+      user_email: user.rows[0]["user_email"],
     }
 
     this.sendResponse({ response: session });

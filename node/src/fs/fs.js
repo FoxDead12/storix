@@ -27,8 +27,8 @@ export default class FS extends HTTP {
     job.params  = new Object();
 
     if ( session ) {
-      job.user_id     = session.id;
-      job.user_schema = session.schema;
+      job.user_id     = session.user_id;
+      job.user_schema = session.user_schema;
     }
 
     const url = new URL(req.url, `http://localhost/`);

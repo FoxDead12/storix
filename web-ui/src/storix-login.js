@@ -83,13 +83,13 @@ export default class StorixLogin extends LitElement {
 
   render () {
     return html `
-      <form id="form" @submit=${this.login.bind(this)}>
+      <form id="form">
         <h1>Login</h1>
-        <paper-input id="email" label="Email *" ></paper-input>
-        <paper-input id="password" type="${this._passwordIconState == true ? 'password' : 'text'}" label="Password *">
+        <paper-input name="email" id="email" label="Email *" ></paper-input>
+        <paper-input name="email" id="password" type="${this._passwordIconState == true ? 'password' : 'text'}" label="Password *">
           <storix-icon slot="suffix" icon="${this._passwordIconState == true ? 'eye' : 'eye-slash'}" @click=${this._showIconState.bind(this)} ></storix-icon>
         </paper-input>
-        <paper-button raised @click=${() => {this.form.requestSubmit()}} >Enter</paper-button>
+        <paper-button raised @click=${this.login.bind(this)}>Enter</paper-button>
       </form>
 
       <storix-toast id="toast" ></storix-toast>
@@ -99,9 +99,25 @@ export default class StorixLogin extends LitElement {
   firstUpdated () {
     this.toast = this.shadowRoot.getElementById('toast');
     this.form = this.shadowRoot.getElementById('form');
+
+    this._refresh();
+
     this.form.addEventListener("keydown", (e) => {
-      if (e.key === 'Enter') this.login(e);
-    })
+      if (e.key === 'Enter') {
+        const path = e.composedPath();
+        if ( !path.find(e => e.tagName === 'PAPER-BUTTON') ) {
+          this.login(e);
+        }
+      }
+    });
+
+  }
+
+  async _refresh () {
+    const result = await this.broker._refreshToken();
+    if ( result.status === 200) {
+      window.location.href = '/';
+    }
   }
 
   _showIconState () {
