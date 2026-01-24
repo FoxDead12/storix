@@ -47,8 +47,8 @@ export default class RefreshToken extends Job {
     await Session.delete_session(this.redis, token);
 
     this.res.setHeader('Set-Cookie', [
-      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict`,
-      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict`
+      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=900`,
+      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict; Max-Age=172800`
     ]);
     this.sendResponse({ message: 'Refresh was successful' });
 
