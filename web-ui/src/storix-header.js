@@ -194,15 +194,16 @@ export default class StorixHeader extends LitElement {
       uuids.push(item.uuid);
     }
 
-    const file = await fetch('../fs/download', { method: 'POST', body: JSON.stringify({items: uuids}) });
-    const blob = await file.blob();
+    // const file = await fetch('../fs/download', { method: 'GET', body: JSON.stringify({items: uuids}) });
+    // const blob = await file.blob();
 
-    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = `../fs/download?items=${encodeURIComponent(uuids)}`;;
     a.download = "download.zip";
+    document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    a.remove();
+
 
     app.currentPage.selectedItems = new Array();
 

@@ -12,7 +12,7 @@
     "role_mask": "0x01"
   },
   {
-    "method": ["POST"],
+    "method": ["GET"],
     "route": "^/download(.+)?",
     "job": "download-ops",
     "role_mask": "0x01"

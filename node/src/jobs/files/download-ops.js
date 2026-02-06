@@ -12,7 +12,7 @@ export default class DownloadOps extends Job {
     this.job = job;
 
     switch ( this.req.method ) {
-      case 'POST':
+      case 'GET':
         await this.download_zip();
         break;
       default:
@@ -24,11 +24,8 @@ export default class DownloadOps extends Job {
   // ... method will create a temporary zip to send to client ...
   async download_zip () {
 
-    // ... parse body from request ...
-    this.job.body = await this._parse_body(this.req);
-
     // ... get items to download ...
-    const uuids = this.job?.body?.items;
+    const uuids = this.job?.params?.items.split(',');
     if ( !uuids || uuids.length == 0 ) {
       return this.reportError({status: 400, message: 'Need indicate at least 1 item to download'});
     }
@@ -74,22 +71,6 @@ export default class DownloadOps extends Job {
       fs.rm(tmp_dir, { recursive: true, force: true }, () => {});
     });
 
-  }
-
-  async _parse_body (req) {
-    return await new Promise((res, rej) => {
-      const body = [];
-      req
-        .on('data', chunk => body.push(chunk))
-        .on('end', () => {
-          try {
-            res(JSON.parse(Buffer.concat(body).toString()))
-          } catch (e) {
-            rej(HTTPError('Invalid body of json', 400));
-          }
-        })
-        .on('error', err => rej(err))
-    });
   }
 
 }
