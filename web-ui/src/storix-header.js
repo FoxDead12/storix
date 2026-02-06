@@ -186,7 +186,7 @@ export default class StorixHeader extends LitElement {
   async _downloadFiles () {
     const message = `Tarefa em progresso, a baixar ${app.currentPage.selectedItems.length} ficheiro/s`
 
-    const toast = app.openToast({ message: message, no_duration: true })
+    const toast = app.openToast({ message: message })
 
     const items = app.currentPage.selectedItems;
     const uuids = new Array();
@@ -207,7 +207,6 @@ export default class StorixHeader extends LitElement {
 
     app.currentPage.selectedItems = new Array();
 
-    toast.remove();
   }
 
 }
