@@ -37,8 +37,8 @@ export default class Login extends Job {
     })
 
     this.res.setHeader('Set-Cookie', [
-      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict`,
-      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict`
+      `token=${access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=900`,
+      `refresh=${refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict; Max-Age=172800`
     ]);
     this.sendResponse({ message: 'Authentication was successful' });
 
