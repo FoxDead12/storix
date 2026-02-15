@@ -204,7 +204,6 @@ export default class StorixHeader extends LitElement {
     a.click();
     a.remove();
 
-
     app.currentPage.selectedItems = new Array();
 
   }

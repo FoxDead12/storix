@@ -301,7 +301,7 @@ export default class StorixPhotos extends LitElement {
 
   _showPreview (e) {
     const item = e.currentTarget.item;
-    app.openPreview(item);
+    app.openPreview(item, 'photos');
   }
 
   _selectItemChange (e) {
@@ -339,7 +339,7 @@ export default class StorixPhotos extends LitElement {
       `;
     } else {
       return html`
-        <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item}>
+        <li class="image-container" @click=${this._showPreview.bind(this)} .item=${item} @error=${(e) => console.log(e) }>
           <paper-checkbox @click=${(e) => e.stopPropagation()} @change=${this._selectItemChange.bind(this)}></paper-checkbox>
           <img src="/fs/files/${item.uuid}?filter[thumbnail]=true" alt="${item.description}" uuid=${item.uuid} loading="lazy" @load=${this._onImageLoad.bind(this)}/>
           ${item.type === 'video' ? html`<div class="video-container"><storix-icon class="video-camera-icon" icon="video-camera"></storix-icon></div>` : ''}

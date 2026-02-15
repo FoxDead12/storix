@@ -41,6 +41,14 @@ export default class StorixPreview extends LitElement {
       height: 100vh;
     }
 
+    iframe {
+      position: relative;
+      object-fit: contain;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+    }
+
     .actions-preview {
       position: absolute;
       width: 100%;
@@ -77,6 +85,9 @@ export default class StorixPreview extends LitElement {
     item: {
       typeof: Object
     },
+    type: {
+      typeof: String
+    },
     _renderImage: {
       typeof: Boolean
     },
@@ -108,8 +119,15 @@ export default class StorixPreview extends LitElement {
         </div>
 
         <div id="content-container">
-          ${ this._renderImage == true ? html`<img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
-          ${ this._renderVideo == true ? html`<video src="/fs/files/${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+          ${ this.type == 'photos'
+            ? html`
+              ${ this._renderImage == true ? html`<img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
+              ${ this._renderVideo == true ? html`<video src="/fs/files/${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+              `
+            : html`
+              <iframe src="/fs/files/${this.item.uuid}" width="100%" height="600"></iframe>
+            `
+          }
         </div>
 
       </dialog>

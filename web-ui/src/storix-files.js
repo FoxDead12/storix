@@ -19,8 +19,8 @@ export default class StorixFiles extends LitElement {
       gap: 0.5rem;
 
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
-      grid-auto-rows: 90px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-auto-rows: 100px;
 
       overflow: scroll;
       scrollbar-width: none;
@@ -29,7 +29,6 @@ export default class StorixFiles extends LitElement {
     ul::-webkit-scrollbar {
       display: none;
     }
-
 
     li {
       position: relative;
@@ -148,12 +147,14 @@ export default class StorixFiles extends LitElement {
     }
   }
 
+  _showPreview (e) {
+    const item = e.currentTarget.item;
+    app.openPreview(item, 'files');
+  }
+
   renderItem (item) {
-
-    console.log(item)
-
     return html`
-      <li>
+      <li @click=${this._showPreview.bind(this)} .item=${item}>
         <storix-icon icon="document"></storix-icon>
         <p>${item.description}</p>
       </li>
