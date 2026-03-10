@@ -72,7 +72,12 @@ export default class StorixApp extends LitElement {
     // ... event to handle mouse backwards ...
     window.addEventListener('popstate', (e) => {
       setDefaultRoute();
-    })
+    });
+
+    document.body.addEventListener('error', (err) => {
+      console.log("entrei no evento do david")
+      console.log(err)
+    });
   }
 
 
@@ -118,9 +123,10 @@ export default class StorixApp extends LitElement {
     });
   }
 
-  openPreview (item) {
+  openPreview (item, type) {
     const preview = document.createElement("storix-preview");
     preview.item = item;
+    preview.type = type;
     this.shadowRoot.append(preview);
   }
 
