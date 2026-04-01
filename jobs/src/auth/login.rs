@@ -20,11 +20,11 @@ impl JobAbstract for LoginJob {
                 Ok(p) => p,
                 Err(e) => {
                     let msg = format!("Invalid JSON payload: {}", e);
-                    return self.success_response(&mut job, &msg, Some("PAYLOAD_MISMATCH"), None);
+                    return self.error_response(&mut job, &msg, Some("PAYLOAD_MISMATCH"), None);
                 }
             }
         }
-        None => return self.success_response(&mut job, "A JSON payload is required for this operation, but none was provided.", Some("MISSING_PAYLOAD"), None)
+        None => return self.error_response(&mut job, "A JSON payload is required for this operation, but none was provided.", Some("MISSING_PAYLOAD"), None)
     };
 
     // ... in this moment we contain the valid payload ...
@@ -38,15 +38,13 @@ impl JobAbstract for LoginJob {
     ]) {
         Ok(Some(row)) => row,
         Ok(None) => {
-            return;
+            return self.error_response(&mut job, "Authentication failed. Please check your login details.", Some("AUTH_FAILED"), None);
         }
         Err(e) => {
-            return;
+            eprintln!("[DB Error] {}", e);
+            return self.error_response(&mut job, "Internal server error.", Some("DB_ERROR"), None);
         }
     };
-
-    // let user = await this.db.query('SELECT id, name, email, encrypt_password, role_mask, u_schema FROM public.users WHERE email = $1 AND deleted = false', [email]);
-
 
     self.success_response(&mut job, "Processado com sucesso", Some("Need send all payload"), None);
   }
