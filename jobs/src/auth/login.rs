@@ -42,9 +42,13 @@ impl JobAbstract for LoginJob {
         }
         Err(e) => {
             eprintln!("[DB Error] {}", e);
-            return self.error_response(&mut job, "Internal server error.", Some("DB_ERROR"), None);
+            return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None);
         }
+
+        // ... compare hash string to database value ...
     };
+
+
 
     self.success_response(&mut job, "Processado com sucesso", Some("Need send all payload"), None);
   }
