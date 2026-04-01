@@ -1,0 +1,9 @@
+[
+  {
+    "method": ["POST"],
+    "route": "/login",
+    "job": {
+      "tube": "auth-login"
+    }
+  }
+]

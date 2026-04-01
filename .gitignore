@@ -7,3 +7,5 @@ node/src/config/fs.json
 web-ui/node_modules/
 web-ui/.env
 web-ui/dist
+
+jobs/target

@@ -30,10 +30,16 @@
     "job": "folders-ops",
     "role_mask": "0x01"
   },
-    {
+  {
     "method": ["GET"],
     "route": "^/files(.+)?",
     "job": "files-ops",
+    "role_mask": "0x01"
+  },
+  {
+    "method": ["GET","POST"],
+    "route": "^/share(.+)?",
+    "job": "share-ops",
     "role_mask": "0x01"
   }
 ]

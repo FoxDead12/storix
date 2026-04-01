@@ -1,0 +1,13 @@
+[package]
+name = "jobs"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name="worker-auth"
+path="src/worker-auth/main.rs"
+
+[dependencies]
+brook-http-worker = { git = "https://github.com/FoxDead12/brook-http-worker.git" }
+serde = "1.0.228"
+serde_json = "1.0.149"

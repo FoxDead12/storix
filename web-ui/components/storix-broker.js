@@ -3,8 +3,8 @@ export default class StorixBroker {
 
   refreshPromise = null;
 
-  constructor () {
-    this.url = new URL('api/', window.origin).href;
+  constructor (url = "api/") {
+    this.url = new URL(url, window.origin).href;
   }
 
   async get (url) {
