@@ -1,0 +1,14 @@
+beanstalkd:
+  host: "127.0.0.1"
+  port: 11301
+
+redis:
+  host: "127.0.0.1"
+  port: 6380
+
+postgres:
+  host: "127.0.0.1"
+  port: 5433
+  user: "dx3"
+  password: "root"
+  dbname: "storix"
