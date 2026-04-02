@@ -5,5 +5,12 @@
     "job": {
       "tube": "auth-login"
     }
+  },
+  {
+    "method": ["POST"],
+    "route": "/register",
+    "job": {
+      "tube": "auth-register"
+    }
   }
 ]

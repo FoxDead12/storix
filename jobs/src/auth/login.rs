@@ -47,7 +47,13 @@ impl JobAbstract for LoginJob {
     };
 
     // ... compare hash string to database value ...
+    let password: String = user.get("encrypt_password");
+    let parsed_hash = match argon2::password_hash::PasswordHash::new(&password) {
 
+    };
+
+
+    // assert!(Argon2::default().verify_password(password, &parsed_hash).is_ok());
 
     self.success_response(&mut job, "Processado com sucesso", Some("Need send all payload"), None);
   }
