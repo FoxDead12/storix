@@ -102,7 +102,7 @@ dependencies = [
 [[package]]
 name = "brook-http-worker"
 version = "0.1.0"
-source = "git+https://github.com/FoxDead12/brook-http-worker.git#c9d1dbe45c02e0bdc534d24cb1b4f422f427a699"
+source = "git+https://github.com/FoxDead12/brook-http-worker.git#3b92c801f0e6227c5feb74999b3763c155b7e0e9"
 dependencies = [
  "beanstalkc",
  "postgres",
@@ -544,7 +544,9 @@ name = "jobs"
 version = "0.1.0"
 dependencies = [
  "argon2",
+ "base64",
  "brook-http-worker",
+ "rand",
  "serde",
  "serde_json",
 ]

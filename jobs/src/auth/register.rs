@@ -1,4 +1,4 @@
-use argon2::{Argon2, PasswordHasher, password_hash::{self, rand_core}};
+use argon2::{Argon2, PasswordHasher};
 use brook_http_worker::worker::job::JobAbstract;
 use serde::{ Deserialize, Serialize };
 
@@ -31,11 +31,11 @@ impl JobAbstract for RegisterJob {
                     Ok(p) => p,
                     Err(e) => {
                         let msg = format!("Invalid JSON payload: {}", e);
-                        return self.error_response(&mut job, &msg, Some("PAYLOAD_MISMATCH"), None);
+                        return self.error_response(&mut job, &msg, Some("PAYLOAD_MISMATCH"), None, None);
                     }
                 }
             }
-            None => return self.error_response(&mut job, "A JSON payload is required for this operation, but none was provided.", Some("MISSING_PAYLOAD"), None)
+            None => return self.error_response(&mut job, "A JSON payload is required for this operation, but none was provided.", Some("MISSING_PAYLOAD"), None, None)
         };
 
         // ... in this moment we contain the valid payload ...
@@ -49,12 +49,12 @@ impl JobAbstract for RegisterJob {
             &payload.email
         ]) {
             Ok(Some(_row)) => {
-                return self.error_response(&mut job, "User already exists. Please use another email.", Some("USER_EXISTS"), None);
+                return self.error_response(&mut job, "User already exists. Please use another email.", Some("USER_EXISTS"), None, None);
             },
             Ok(None) => {},
             Err(e) => {
                 eprintln!("[DB Error] {}", e);
-                return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None);
+                return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None, None);
             }
         }
 
@@ -68,7 +68,7 @@ impl JobAbstract for RegisterJob {
             Ok(password_hash) => password_hash.to_string(),
             Err(e) => {
                 eprintln!("[DB Error] {}", e);
-                return self.exception_response(&mut job, "Internal server error.", Some("PASSWORD_HASH"), None);
+                return self.exception_response(&mut job, "Internal server error.", Some("PASSWORD_HASH"), None, None);
             }
         };
 
@@ -94,11 +94,11 @@ impl JobAbstract for RegisterJob {
             },
             Err(e) => {
                 eprintln!("[DB Error] {}", e);
-                return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None);
+                return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None, None);
             }
         };
 
-        self.success_response(&mut job, "User account successfully created", Some("Your account has been registered in our system."), Some(serde_json::json!(user)));
+        self.success_response(&mut job, "User account successfully created", Some("Your account has been registered in our system."), Some(serde_json::json!(user)), None);
     }
 
 }
