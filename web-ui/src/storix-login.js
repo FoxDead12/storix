@@ -77,7 +77,8 @@ export default class StorixLogin extends LitElement {
 
   constructor () {
     super();
-    this.broker = new StorixBroker();
+    this.broker  = new StorixBroker();
+    this.brook   = new StorixBroker("apiv2/");
     this._passwordIconState = true;
   }
 
@@ -140,7 +141,7 @@ export default class StorixLogin extends LitElement {
         return this.toast.openToast({ message: 'Is necessary indicate password', status: 'error' });
       }
 
-      await this.broker.post('login', { email, password });
+      await this.brook.post('login', { email, password });
       window.location.href = '/';
 
     } catch (e) {

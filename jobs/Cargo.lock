@@ -547,6 +547,7 @@ dependencies = [
  "base64",
  "brook-http-worker",
  "rand",
+ "redis",
  "serde",
  "serde_json",
 ]

@@ -24,6 +24,9 @@ export default class RefreshToken extends Job {
 
     const token = match[0];
     const redis_session = await Session.get_session(this.redis, token);
+    console.log(redis_session);
+    console.log(token);
+
     if ( !redis_session || Object.keys(redis_session).length == 0 ) {
       // ... session expired ...
       return this.reportError({message: "Refresh failed, session expired"});

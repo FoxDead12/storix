@@ -3,6 +3,8 @@ use brook_http_worker::worker::job::JobAbstract;
 use serde::{ Deserialize };
 use serde_json::json;
 
+use crate::auth::roles;
+
 pub struct LoginJob;
 
 #[derive(Deserialize)]
@@ -37,7 +39,7 @@ impl JobAbstract for LoginJob {
             name,
             email,
             encrypt_password,
-            role_mask,
+            role_mask::int,
             u_schema
         FROM public.users
         WHERE email = $1 AND deleted = false
@@ -76,6 +78,18 @@ impl JobAbstract for LoginJob {
     // ... create session in redis ...
     let access_token = crate::auth::session::Session::access_token_generate(user.get("id"));
     let refresh_token = crate::auth::session::Session::refresh_token_generate(user.get("id"));
+
+    // ... add session to redis ...
+    crate::auth::session::Session::create(
+        &mut job,
+        user.get("id"),
+        user.get("name"),
+        user.get("email"),
+        user.get("u_schema"),
+        roles::Role::to_hex(user.get("role_mask")),
+        access_token.clone(), // duplicate in memory
+        refresh_token.clone() // duplicate in memory
+    );
 
     // ... at this point user is logged, use email and password ...
     // ... create custom headers to pass to http response ...
