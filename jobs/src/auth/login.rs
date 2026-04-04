@@ -71,6 +71,7 @@ impl JobAbstract for LoginJob {
     match argon2.verify_password(payload.password.as_bytes(), &parsed_hash) {
         Ok(_) => {},
         Err(e) => {
+            eprintln!("[ARGON2 Error] {}", e);
             return self.error_response(&mut job, "Authentication failed. Please check your login details.", Some("AUTH_FAILED"), None, None);
         }
     };
