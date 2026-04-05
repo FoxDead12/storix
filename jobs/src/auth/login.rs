@@ -16,6 +16,7 @@ struct LoginJobRequestPayload {
 impl JobAbstract for LoginJob {
 
   fn perform(&self, mut job: brook_http_worker::worker::job::Job) {
+    brook_http_worker::logger::log("INFO", "Login realizado");
 
     // ... parse body of request to see if match with internal struct ...
     let payload: LoginJobRequestPayload = match &job.payload {
