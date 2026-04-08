@@ -12,3 +12,5 @@ postgres:
   user: "dxavier"
   password: "root"
   dbname: "storix"
+
+logger_path: "/Users/dxavier/Library/Logs/BrookJobs"
