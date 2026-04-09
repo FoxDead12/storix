@@ -111,7 +111,7 @@ dependencies = [
 [[package]]
 name = "brook-http-worker"
 version = "0.1.0"
-source = "git+https://github.com/FoxDead12/brook-http-worker.git#287a23a65bbd7aaee5952089841a7db6777cee5c"
+source = "git+https://github.com/FoxDead12/brook-http-worker.git#6453082c70faa7ae3ae23a51cfb8efcd39349f4e"
 dependencies = [
  "beanstalkc",
  "chrono",
