@@ -16,7 +16,6 @@ struct LoginJobRequestPayload {
 impl JobAbstract for LoginJob {
 
   fn perform(&self, mut job: brook_http_worker::worker::job::Job) {
-    brook_http_worker::logger::log("INFO", "Login realizado");
 
     // ... parse body of request to see if match with internal struct ...
     let payload: LoginJobRequestPayload = match &job.payload {
@@ -52,7 +51,7 @@ impl JobAbstract for LoginJob {
             return self.error_response(&mut job, "Authentication failed. Please check your login details.", Some("AUTH_FAILED"), None, None);
         }
         Err(e) => {
-            eprintln!("[DB Error] {}", e);
+            brook_http_worker::logger::log("ERROR", e.to_string().as_str());
             return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None, None);
         }
     };
@@ -62,7 +61,7 @@ impl JobAbstract for LoginJob {
     let parsed_hash = match argon2::password_hash::PasswordHash::new(&password) {
         Ok(parsed_hash) => parsed_hash,
         Err(e) => {
-            eprintln!("[DB Error] {}", e);
+            brook_http_worker::logger::log("ERROR", e.to_string().as_str());
             return self.exception_response(&mut job, "Internal server error.", Some("PASSWORD_HASH"), None, None);
         }
     };
@@ -71,8 +70,7 @@ impl JobAbstract for LoginJob {
     let argon2 = argon2::Argon2::default();
     match argon2.verify_password(payload.password.as_bytes(), &parsed_hash) {
         Ok(_) => {},
-        Err(e) => {
-            eprintln!("[ARGON2 Error] {}", e);
+        Err(_) => {
             return self.error_response(&mut job, "Authentication failed. Please check your login details.", Some("AUTH_FAILED"), None, None);
         }
     };
