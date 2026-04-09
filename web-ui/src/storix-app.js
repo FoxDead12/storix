@@ -55,7 +55,6 @@ export default class StorixApp extends LitElement {
   }
 
   firstUpdated () {
-    StorixSession.refreshToken();
     this.toast = this.shadowRoot.getElementById('toast');
     this.pageRender = this.shadowRoot.getElementById('page-render');
 

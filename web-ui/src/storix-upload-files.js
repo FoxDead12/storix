@@ -243,16 +243,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
       })
     }
 
-    try {
-      return await upload();
-    } catch (e) {
-      if ( e?.type === 'unauthorized' ) {
-        await app.broker._refreshToken();
-        return await upload();
-      } else {
-        throw e
-      }
-    }
+    return await upload();
   }
 
   // -------------------------------------------------------------------- //

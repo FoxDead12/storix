@@ -142,7 +142,7 @@ export default class HTTP {
     }
 
     // ... check role mask from user and route ...
-    const role_mask = parseInt(session_obj.user_role_mask, 16);
+    const role_mask = parseInt(session_obj.user_roles, 16);
     if ( !(role_mask & route_mask) ) {
       throw new HTTPError('Forbidden', 403);
     }

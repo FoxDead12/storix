@@ -9,10 +9,4 @@ export default class StorixSession {
     }
   }
 
-  static async refreshToken () {
-    setInterval(async () => {
-      await app.broker.patch('session', {});
-    }, 3400 * 1000)
-  }
-
 }

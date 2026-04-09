@@ -77,7 +77,6 @@ export default class StorixLogin extends LitElement {
 
   constructor () {
     super();
-    this.broker  = new StorixBroker();
     this.brook   = new StorixBroker("apiv2/");
     this._passwordIconState = true;
   }
@@ -101,8 +100,6 @@ export default class StorixLogin extends LitElement {
     this.toast = this.shadowRoot.getElementById('toast');
     this.form = this.shadowRoot.getElementById('form');
 
-    this._refresh();
-
     this.form.addEventListener("keydown", (e) => {
       if (e.key === 'Enter') {
         const path = e.composedPath();
@@ -112,13 +109,6 @@ export default class StorixLogin extends LitElement {
       }
     });
 
-  }
-
-  async _refresh () {
-    const result = await this.broker._refreshToken();
-    if ( result.status === 200) {
-      window.location.href = '/';
-    }
   }
 
   _showIconState () {
