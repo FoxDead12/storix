@@ -52,6 +52,8 @@ impl Session {
         let _ = job.redis.hset_multiple::<&std::string::String, &str, std::string::String, String>(&redis_access_key, &redis_access_payload);
         let _ =job.redis.expire::<&std::string::String, String>(&redis_access_key, redis_access_duration);
 
+        return;
+
         // ... create access token in redis (refresh token) ...
         let redis_refresh_key = format!("user:session:{}", refresh_token);
         let redis_refresh_payload = [

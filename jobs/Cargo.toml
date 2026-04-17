@@ -5,7 +5,7 @@ edition = "2024"
 
 [[bin]]
 name="worker-auth"
-path="src/worker-auth/main.rs"
+path="src/main.rs"
 
 [dependencies]
 argon2 = { version = "0.5.3", features = ["std"] }

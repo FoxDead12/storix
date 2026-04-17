@@ -10,8 +10,8 @@ fn main() {
     let mut w = Worker::new();
 
     // ... tubes of worker ...
-    w.add_job("auth-login", LoginJob);
-    w.add_job("auth-register", RegisterJob);
+    w.add_job("storix-login", LoginJob);
+    w.add_job("storix-register", RegisterJob);
 
     w.start();
 }

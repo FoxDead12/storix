@@ -35,7 +35,6 @@ export default class StorixApp extends LitElement {
     super();
     window.app   = this;
     this.broker  = new StorixBroker();
-    this.brook   = new StorixBroker("apiv2/");
     this.session = new Object();
     this.routes  = new StorixRoutes();
     this.currentPage = null;
