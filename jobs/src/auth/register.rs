@@ -53,7 +53,7 @@ impl JobAbstract for RegisterJob {
             },
             Ok(None) => {},
             Err(e) => {
-                eprintln!("[DB Error] {}", e);
+                brook_http_worker::logger::log("ERROR", e.to_string().as_str());
                 return self.exception_response(&mut job, "Internal server error.", Some("DB_ERROR"), None, None);
             }
         }

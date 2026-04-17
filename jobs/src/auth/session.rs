@@ -42,11 +42,9 @@ impl Session {
         let redis_access_key = format!("user:token:{}", acces_token);
         let redis_access_payload = [
             ("user_id", user_id.to_string()),
-            ("user_name", user_name.clone()),
-            ("user_email", user_email.clone()),
             ("user_schema", user_schema.clone()),
             ("user_roles", user_roles.clone()),
-            ("acces_token", acces_token)
+            ("product_key", "storix".to_string())
         ];
         let redis_access_duration = 15 * 60 * 1000; // 15 minuts
         let _ = job.redis.hset_multiple::<&std::string::String, &str, std::string::String, String>(&redis_access_key, &redis_access_payload);

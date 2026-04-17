@@ -1,5 +1,5 @@
 use brook_http_worker::worker::worker::Worker;
-use jobs::auth::{login::LoginJob, register::RegisterJob};
+use jobs::{actions::user_session::UserSession, auth::{login::LoginJob, register::RegisterJob}};
 
 /**
  * Worker in rust, will handle jobs comming from beanstalkd
@@ -7,11 +7,13 @@ use jobs::auth::{login::LoginJob, register::RegisterJob};
  */
 
 fn main() {
-    let mut w = Worker::new();
+    let mut worker = Worker::new();
 
     // ... tubes of worker ...
-    w.add_job("storix-login", LoginJob);
-    w.add_job("storix-register", RegisterJob);
+    worker.add_job("storix-login", LoginJob);
+    worker.add_job("storix-register", RegisterJob);
 
-    w.start();
+    worker.add_job("storix-user-session", UserSession);
+
+    worker.start();
 }
