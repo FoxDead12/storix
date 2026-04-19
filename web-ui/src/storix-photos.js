@@ -211,7 +211,7 @@ export default class StorixPhotos extends LitElement {
     const newItems = []
 
     // ... generate separators ...
-    for ( const item of result.response ) {
+    for ( const item of result.data ) {
 
       const date_day = item.birthtime_date;
       const date_month = item.birthtime_date.slice(0, 7);
@@ -238,7 +238,7 @@ export default class StorixPhotos extends LitElement {
     await this.updateComplete;
 
     // ... after lit render ...
-    if ( result.response.length < 100 ) {
+    if ( result.data.length < 100 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {

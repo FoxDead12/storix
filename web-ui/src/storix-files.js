@@ -121,14 +121,14 @@ export default class StorixFiles extends LitElement {
 
     // ... request files from server ...
     const result = await app.broker.get('files?filter[p_files]=true&page=' + this.page);
-    this.items.push(...result.response);
+    this.items.push(...result.data);
 
     // ... make lit update DOM, and await DOM be ready ...
     this.requestUpdate();
     await this.updateComplete;
 
     // ... check if is necessary keep render more data ...
-    if ( result.response.length < 20 ) {
+    if ( result.data.length < 20 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {
