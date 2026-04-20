@@ -9,6 +9,14 @@ struct SessionPayload {
   schema: String
 }
 
+#[derive(Deserialize, Debug)]
+struct ParamsPayload {
+    #[serde(rename = "filter[p_photos]")]
+    p_photos: Option<String>,
+    #[serde(rename = "filter[p_files]")]
+    p_files: Option<String>,
+    page: String,
+}
 
 impl JobAbstract for FilesList {
 
@@ -28,7 +36,29 @@ impl JobAbstract for FilesList {
             None => return self.exception_response(&mut job, "Internal server error", Some("MISSING_PAYLOAD"), None, None)
         };
 
-        let mut query_attributes: [&str; 7] = [
+        println!("params: {:?}", job.params);
+
+        let params: ParamsPayload = match &job.params {
+            Some(raw) => match serde_json::from_value::<ParamsPayload>(raw.clone()) {
+                Ok(p) => p,
+                Err(e) => {
+                    brook_http_worker::logger::log("ERROR", format!("Params mismatch: {}", e).as_str());
+                    return self.exception_response(&mut job, "Invalid parameters structure", Some("PARAMS_MISMATCH"), None, None);
+                }
+            },
+            None => return self.exception_response(&mut job, "Parameters are required", Some("MISSING_PARAMS"), None, None)
+        };
+
+        // ... convert string param to integer ...
+        let page_number: i64 = match params.page.parse::<i64>() {
+            Ok(n) => if n < 1 { 1 } else { n },
+            Err(e) => {
+                let msg = format!("Invalid JSON payload: {}", e);
+                return self.error_response(&mut job, &msg, Some("PAYLOAD_MISMATCH"), None, None);
+            }
+        };
+
+        let query_attributes: [&str; 7] = [
             "uuid",
             "description",
             "extension",
@@ -37,11 +67,11 @@ impl JobAbstract for FilesList {
             "folder_id",
             "type"
         ];
-        let mut query_table = "files";
+        let query_table = "files";
         let mut query_filters: Vec<&str> = Vec::new();
-        let mut query_order_by = "birthtime DESC, create_at DESC";
-        let mut query_offset = 0;
-        let mut query_limit = 100;
+        let query_order_by = "birthtime DESC, create_at DESC";
+        let query_offset = 0;
+        let query_limit = 100;
 
         query_filters.push("type IN ('image', 'video')");
 
