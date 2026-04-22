@@ -36,8 +36,6 @@ impl JobAbstract for FilesList {
             None => return self.exception_response(&mut job, "Internal server error", Some("MISSING_PAYLOAD"), None, None)
         };
 
-        println!("params: {:?}", job.params);
-
         let params: ParamsPayload = match &job.params {
             Some(raw) => match serde_json::from_value::<ParamsPayload>(raw.clone()) {
                 Ok(p) => p,
@@ -58,6 +56,19 @@ impl JobAbstract for FilesList {
             }
         };
 
+        // ... filter clause ...
+        let filter_clause = match (&params.p_photos, &params.p_files) {
+            (Some(p), None) if p == "true" => "type IN ('image', 'video')",
+            (None, Some(f)) if f == "true" => "type NOT IN ('image', 'video')",
+            (Some(_), Some(_)) => {
+                return self.error_response(&mut job, "Send only one filter: p_photos or p_files", Some("AMBIGUOUS_FILTER"), None, None);
+            },
+            _ => {
+                return self.error_response(&mut job, "Parameters are required", Some("MISSING_PARAMS"), None, None);
+            }
+        };
+
+        // ... params to query ...
         let query_attributes: [&str; 7] = [
             "uuid",
             "description",
@@ -68,12 +79,15 @@ impl JobAbstract for FilesList {
             "type"
         ];
         let query_table = "files";
-        let mut query_filters: Vec<&str> = Vec::new();
+        let query_filters = filter_clause;
         let query_order_by = "birthtime DESC, create_at DESC";
-        let query_offset = 0;
         let query_limit = 100;
+        let mut query_offset = 0;
 
-        query_filters.push("type IN ('image', 'video')");
+        // ... only allow page if param is biger than 1 ...
+        if (page_number > 1) {
+            query_offset = query_limit * (page_number - 1);
+        }
 
         // ... build query struct ...
         let query = format!("
@@ -87,12 +101,13 @@ impl JobAbstract for FilesList {
             query_attributes.join(","),
             session.schema,
             query_table,
-            query_filters.join(" AND "),
+            query_filters,
             query_order_by,
             query_offset,
             query_limit
         );
 
+        // ... execute query ...
         let rows = match job.postgres.query(&query, &[]) {
             Ok(rows) => rows,
             Err(e) => {
@@ -101,37 +116,26 @@ impl JobAbstract for FilesList {
             }
         };
 
+        // ... create list of files to send to front end ...
         let mut files_list: Vec<Value> = Vec::new();
 
+        // ... create new file struct ...
         for row in rows {
             let mut row_map = Map::new();
-
-            // Iteramos sobre os nomes das colunas que definiu no array
             for (i, col_full_name) in query_attributes.iter().enumerate() {
-
-                // Lógica para limpar o nome da chave no JSON:
-                // Se a coluna for "to_char(...) as birthtime_date", queremos apenas "birthtime_date"
                 let json_key = col_full_name
                     .split(" as ")
                     .last()
                     .unwrap_or(col_full_name)
                     .trim();
 
-                // Extrair o valor da coluna.
-                // Nota: O Rust precisa saber o tipo. Se as colunas variarem,
-                // o mais seguro é tentar extrair como Value (se o driver suportar)
-                // ou tipos comuns como String, i32, etc.
                 let value: Option<String> = row.try_get(i).unwrap_or(None);
-
                 row_map.insert(json_key.to_string(), json!(value));
             }
-
-            // Adiciona o objeto (linha) ao array principal
             files_list.push(Value::Object(row_map));
         }
 
-        self.success_response(&mut job, "List off files", None, Some(serde_json::json!(files_list)), None);
-
+        self.success_response(&mut job, "Files list", None, Some(serde_json::json!(files_list)), None);
 
     }
 

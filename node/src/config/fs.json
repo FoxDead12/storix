@@ -18,5 +18,15 @@
       "level": "info",
       "directory": "/Users/dx3/Developer/storix/logs/fs/"
     }
+  },
+  "bazzite": {
+    "port": 5002,
+    "host": "localhost",
+    "upload_dir": "/home/dx3/.storix-uploads",
+    "daemon": true,
+    "logger": {
+      "level": "info",
+      "directory": "/var/log/storix/fs/"
+    }
   }
 }

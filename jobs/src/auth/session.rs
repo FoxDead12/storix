@@ -46,7 +46,7 @@ impl Session {
             ("user_roles", user_roles.clone()),
             ("product_key", "storix".to_string())
         ];
-        let redis_access_duration = 15 * 60 * 1000; // 15 minuts
+        let redis_access_duration = 15 * 60; // 15 minuts
         let _ = job.redis.hset_multiple::<&std::string::String, &str, std::string::String, String>(&redis_access_key, &redis_access_payload);
         let _ =job.redis.expire::<&std::string::String, String>(&redis_access_key, redis_access_duration);
 
