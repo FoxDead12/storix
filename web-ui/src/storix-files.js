@@ -128,7 +128,7 @@ export default class StorixFiles extends LitElement {
     await this.updateComplete;
 
     // ... check if is necessary keep render more data ...
-    if ( result.data.length < 20 ) {
+    if ( result.data.length < 100 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {
