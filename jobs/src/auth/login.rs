@@ -95,7 +95,7 @@ impl JobAbstract for LoginJob {
     // ... create custom headers to pass to http response ...
     let headers = json!({
         "Set-Cookie": [
-            format!("token={access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=900"),
+            format!("token={access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600"),
             format!("refresh={refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict; Max-Age=172800")
         ]
     });

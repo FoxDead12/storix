@@ -55,6 +55,7 @@ export default class StorixPreview extends LitElement {
       height: 100%;
       display: flex;
       flex-direction: column;
+      pointer-events: none;
     }
 
     .actions-preview > div {
@@ -77,6 +78,7 @@ export default class StorixPreview extends LitElement {
       background-color: rgba(0, 0, 0, .7);
       margin: 0px 24px;
       z-index: 10;
+      pointer-events: auto;
     }
 
   `;
@@ -121,11 +123,11 @@ export default class StorixPreview extends LitElement {
         <div id="content-container">
           ${ this.type == 'photos'
             ? html`
-              ${ this._renderImage == true ? html`<img class="thumbnail" src="/fs/files/${this.item.uuid}?filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
-              ${ this._renderVideo == true ? html`<video src="/fs/files/${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+              ${ this._renderImage == true ? html`<img class="thumbnail" src="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
+              ${ this._renderVideo == true ? html`<video src="/api/download?uuid=${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
               `
             : html`
-              <iframe src="/fs/files/${this.item.uuid}" width="100%" height="600"></iframe>
+              <iframe src="/api/download?uuid=${this.item.uuid}" width="100%" height="600"></iframe>
             `
           }
         </div>
@@ -166,7 +168,7 @@ export default class StorixPreview extends LitElement {
     if ( src && src.endsWith('filter[thumbnail]=true') ) {
       if ( this.item.type === 'image' ) {
         img.classList.remove('thumbnail');
-        img.setAttribute('src', `/fs/files/${this.item.uuid}`);
+        img.setAttribute('src', `/api/download?uuid=${this.item.uuid}`);
         return;
       }
       if ( this.item.type === 'video' ) {

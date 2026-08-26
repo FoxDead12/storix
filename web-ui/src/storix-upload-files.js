@@ -196,7 +196,7 @@ export default class StorixUploadFiles extends StorixDialogPage {
   async _upload (file) {
     const upload = async () => {
       return new Promise((res, rej) => {
-        const uploadUrl = new URL('/fs/upload', window.origin);
+        const uploadUrl = new URL('/api/upload', window.origin);
         uploadUrl.searchParams.append('file_name', file.name);
         uploadUrl.searchParams.append('directory', 0);
 
