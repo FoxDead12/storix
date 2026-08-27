@@ -124,6 +124,14 @@ export default class StorixPhotos extends LitElement {
       background-color: rgba(0, 0, 0, 0.2);
     }
 
+    .image-container.placeholder {
+      cursor: default;
+    }
+
+    .image-container.placeholder:hover::before {
+      background-color: transparent;
+    }
+
     .image-container > paper-checkbox {
       position: absolute;
       display: none;
@@ -212,9 +220,6 @@ export default class StorixPhotos extends LitElement {
   `;
 
   static properties = {
-    _stopFetch: {
-      typeof: Boolean
-    },
     // ... this prop need be equal in all pages of project, the app will try catch ...
     items: {
       typeof: Array
@@ -222,9 +227,6 @@ export default class StorixPhotos extends LitElement {
     // ... this prop need be equal in all pages of project, the app will try catch ...
     selectedItems: {
       typeof: Array
-    },
-    page: {
-      typeof: Number
     },
     _yearCounts: {
       typeof: Array
@@ -238,8 +240,6 @@ export default class StorixPhotos extends LitElement {
     super();
     this.items = new Array();
     this.selectedItems = new Array();
-    this._stopFetch = false;
-    this.page = 1;
     this._yearCounts = new Array();
     this._activeYear = null;
 
@@ -249,7 +249,7 @@ export default class StorixPhotos extends LitElement {
   render () {
     return html`
       <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
-        ${repeat(this.items, (items) => items.uuid, this.renderItem.bind(this))}
+        ${repeat(this.items, (item) => item.key || item.uuid, this.renderItem.bind(this))}
       </ul>
       ${this.items.length == 0 ? this.renderEmptyList() : ''}
       ${this._yearCounts.length > 0 ? this.renderYearScrubber() : ''}
@@ -257,18 +257,71 @@ export default class StorixPhotos extends LitElement {
   }
 
   firstUpdated () {
+
     this.list = this.shadowRoot.getElementById('files-list');
-    this.fetchYearCounts();
+    this._observedSentinels = new WeakSet();
+    this._loadedPages = new Set();
+    this._loadingPages = new Set();
+
+    // ... watch placeholders as they approach the viewport (in either scroll
+    // direction) and load the real page they belong to ...
+    this._pageObserver = new IntersectionObserver((entries) => {
+      for ( const entry of entries ) {
+        if ( entry.isIntersecting ) {
+          this._pageObserver.unobserve(entry.target);
+          this._loadPage(Number(entry.target.dataset.page));
+        }
+      }
+    }, { root: this.list, rootMargin: '800px 0px 800px 0px', threshold: 0 });
+
+    this._init();
+
+  }
+
+  async _init () {
+    await this.fetchYearCounts();
+    this._buildSkeleton();
   }
 
   updated (changeProps) {
-    if ( changeProps.has('page') && !this._stopFetch && !this._jumping ) {
-      this.fetchPhotos();
-    }
+
+    this._attachPageObservers();
 
     if ( changeProps.has('selectedItems') ) {
       window.dispatchEvent(new CustomEvent('selected-items-changed', { detail: null }));
     }
+  }
+
+  // ... creates one placeholder entry per photo (we already know the totals from
+  // the year counts), so the scrollbar/scroll height is correct from the start
+  // and scrolling in any direction has something to load towards ...
+  _buildSkeleton () {
+
+    const total = this._yearCounts.reduce((sum, y) => sum + y.count, 0);
+    this._totalPages = Math.max(1, Math.ceil(total / 100));
+
+    for ( let page = 1; page <= this._totalPages; page++ ) {
+      const countInPage = Math.min(100, total - (page - 1) * 100);
+      for ( let i = 0; i < countInPage; i++ ) {
+        this.items.push({ placeholder: true, page, sentinel: i === 0, key: `ph-${page}-${i}` });
+      }
+    }
+
+    this.requestUpdate();
+
+  }
+
+  _attachPageObservers () {
+
+    if ( !this.list ) return;
+
+    const sentinels = this.list.querySelectorAll('[data-sentinel="1"]');
+    for ( const el of sentinels ) {
+      if ( this._observedSentinels.has(el) ) continue;
+      this._observedSentinels.add(el);
+      this._pageObserver.observe(el);
+    }
+
   }
 
   async _fetchPageRaw (page) {
@@ -276,61 +329,83 @@ export default class StorixPhotos extends LitElement {
     return result.data;
   }
 
-  // ... turns a raw page of files into { separator } + file entries, appending to this.items ...
-  _appendItems (rawItems) {
+  async fetchYearCounts () {
+    const result = await app.broker.get('files?filter[p_photos]=true&aggregate=years');
+    this._yearCounts = result.data.map((row) => ({ year: Number(row.year), count: Number(row.count) }));
+  }
 
-    const newItems = [];
+  async _loadPage (page) {
+
+    if ( this._loadedPages.has(page) || this._loadingPages.has(page) ) return;
+    this._loadingPages.add(page);
+
+    let rawItems;
+    try {
+      rawItems = await this._fetchPageRaw(page);
+    } finally {
+      this._loadingPages.delete(page);
+    }
+
+    this._loadedPages.add(page);
+
+    // ... find this page's placeholder slot, it might have shifted position
+    // since other pages loaded (their real content can be a different length
+    // than 100, once separators are added) ...
+    const startIndex = this.items.findIndex((it) => it.placeholder && it.page === page);
+    if ( startIndex === -1 ) return;
+
+    let endIndex = startIndex;
+    while ( endIndex < this.items.length && this.items[endIndex].placeholder && this.items[endIndex].page === page ) {
+      endIndex++;
+    }
+
+    const entries = this._buildPageEntries(startIndex, rawItems);
+    this.items.splice(startIndex, endIndex - startIndex, ...entries);
+    this.requestUpdate();
+    await this.updateComplete;
+
+    this._attachPageObservers();
+    this._updateActiveYearFromScroll();
+
+  }
+
+  // ... turns a raw page of files into { separator } + file entries, using
+  // whatever real item is already loaded right before this page (if any) to
+  // avoid repeating its month/day separator ...
+  _buildPageEntries (startIndex, rawItems) {
+
+    const entries = [];
+
+    let prevMonth = null;
+    let prevDay = null;
+    for ( let i = startIndex - 1; i >= 0; i-- ) {
+      const it = this.items[i];
+      if ( it.placeholder || it.separator ) continue;
+      prevMonth = it.birthtime_date.slice(0, 7);
+      prevDay = it.birthtime_date;
+      break;
+    }
 
     for ( const item of rawItems ) {
 
       const date_day = item.birthtime_date;
       const date_month = item.birthtime_date.slice(0, 7);
 
-      if ( this.currentMonth != date_month ) {
-        this.currentMonth = date_month;
-        const separator = { separator: true, month: date_month };
-        newItems.push(separator);
+      if ( prevMonth !== date_month ) {
+        entries.push({ separator: true, month: date_month, key: `sep-m-${date_month}` });
+        prevMonth = date_month;
       }
 
-
-      if ( this.currentDay != date_day ) {
-        this.currentDay = date_day;
-        const separator = { separator: true, day: date_day };
-        newItems.push(separator);
+      if ( prevDay !== date_day ) {
+        entries.push({ separator: true, day: date_day, key: `sep-d-${date_day}` });
+        prevDay = date_day;
       }
 
-      newItems.push(item);
+      entries.push(item);
     }
 
-    this.items.push(...newItems);
+    return entries;
 
-  }
-
-  async fetchPhotos () {
-
-    const rawItems = await this._fetchPageRaw(this.page);
-    this._appendItems(rawItems);
-
-    // ... force lit to render all images ...
-    this.requestUpdate();
-    await this.updateComplete;
-
-    // ... after lit render ...
-    if ( rawItems.length < 100 ) {
-      this._stopFetch = true;
-    } else {
-      if ( this.list.clientHeight < this.clientHeight ) {
-        this.page += 1;
-      }
-    }
-
-    this._updateActiveYearFromScroll();
-
-  }
-
-  async fetchYearCounts () {
-    const result = await app.broker.get('files?filter[p_photos]=true&aggregate=years');
-    this._yearCounts = result.data.map((row) => ({ year: Number(row.year), count: Number(row.count) }));
   }
 
   async _jumpToYear (year) {
@@ -342,46 +417,12 @@ export default class StorixPhotos extends LitElement {
 
     const targetPage = Math.floor(offset / 100) + 1;
 
-    this.items = [];
-    this.currentMonth = null;
-    this.currentDay = null;
-    this._stopFetch = false;
     this._activeYear = year;
 
-    // ... drive this fetch ourselves instead of relying on updated(), so we can
-    // scroll to the exact separator once the last page (which may still start with
-    // photos from the previous year, when this year has few photos) has loaded.
-    // Fetch every page from the top through the target one (in parallel, then applied
-    // in order) instead of just the target page, so scrolling back up afterwards still
-    // has the newer years already loaded, instead of hitting a dead end ...
-    this._jumping = true;
-
-    try {
-
-      const pages = await Promise.all(
-        Array.from({ length: targetPage }, (_, i) => this._fetchPageRaw(i + 1))
-      );
-
-      let lastPageLength = 100;
-      for ( const rawItems of pages ) {
-        this._appendItems(rawItems);
-        lastPageLength = rawItems.length;
-      }
-
-      this.requestUpdate();
-      await this.updateComplete;
-
-      if ( lastPageLength < 100 ) {
-        this._stopFetch = true;
-        this.page = targetPage;
-      } else {
-        this.page = targetPage + 1;
-      }
-
-    } finally {
-      this._jumping = false;
-    }
-
+    // ... the skeleton already covers the whole gallery, so jumping is just
+    // making sure this one page is loaded and scrolling to it - the pages
+    // around it stay as placeholders until scroll gets near them ...
+    await this._loadPage(targetPage);
     this._scrollToYear(year);
 
   }
@@ -461,15 +502,7 @@ export default class StorixPhotos extends LitElement {
   }
 
   onScroll (e) {
-
-    const element = e.currentTarget;
-
-    if ( !this._stopFetch && element.offsetHeight + element.scrollTop >= element.scrollHeight - 300 ) {
-      this.page += 1;
-    }
-
     this._updateActiveYearFromScroll();
-
   }
 
   _showPreview (e) {
@@ -500,6 +533,12 @@ export default class StorixPhotos extends LitElement {
   }
 
   renderItem (item) {
+
+    if ( item.placeholder === true ) {
+      return html`
+        <li class="image-container placeholder" data-page=${item.page} data-sentinel=${item.sentinel ? '1' : '0'}></li>
+      `;
+    }
 
     if ( item.separator === true ) {
       const month_date = item.month ? new Date(item.month) : null;
