@@ -15,7 +15,8 @@ struct ParamsPayload {
     p_photos: Option<String>,
     #[serde(rename = "filter[p_files]")]
     p_files: Option<String>,
-    page: String,
+    page: Option<String>,
+    aggregate: Option<String>,
 }
 
 impl JobAbstract for FilesList {
@@ -47,8 +48,13 @@ impl JobAbstract for FilesList {
             None => return self.exception_response(&mut job, "Parameters are required", Some("MISSING_PARAMS"), None, None)
         };
 
+        // ... return per-year photo counts for the gallery's year scrubber ...
+        if params.aggregate.as_deref() == Some("years") {
+            return self.get_year_counts(&mut job, &session.schema);
+        }
+
         // ... convert string param to integer ...
-        let page_number: i64 = match params.page.parse::<i64>() {
+        let page_number: i64 = match params.page.as_deref().unwrap_or("1").parse::<i64>() {
             Ok(n) => if n < 1 { 1 } else { n },
             Err(e) => {
                 let msg = format!("Invalid JSON payload: {}", e);
@@ -136,6 +142,39 @@ impl JobAbstract for FilesList {
         }
 
         self.success_response(&mut job, "Files list", None, Some(serde_json::json!(files_list)), None);
+
+    }
+
+}
+
+impl FilesList {
+
+    fn get_year_counts (&self, job: &mut brook_http_worker::worker::job::Job, schema: &str) {
+
+        let query = format!("
+            SELECT to_char(birthtime, 'YYYY') AS year, COUNT(*)::text AS count
+            FROM {}.files
+            WHERE type IN ('image', 'video')
+            GROUP BY 1
+            ORDER BY 1 DESC
+        ", schema);
+
+        let rows = match job.postgres.query(&query, &[]) {
+            Ok(rows) => rows,
+            Err(e) => {
+                brook_http_worker::logger::log("ERROR", e.to_string().as_str());
+                return self.exception_response(job, "Internal server error", Some("DATABASE_ERROR"), None, None);
+            }
+        };
+
+        let mut year_counts: Vec<Value> = Vec::new();
+        for row in rows {
+            let year: Option<String> = row.try_get(0).unwrap_or(None);
+            let count: Option<String> = row.try_get(1).unwrap_or(None);
+            year_counts.push(json!({ "year": year, "count": count }));
+        }
+
+        self.success_response(job, "Photo year counts", None, Some(serde_json::json!(year_counts)), None);
 
     }
 

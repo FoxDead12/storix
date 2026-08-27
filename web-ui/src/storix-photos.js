@@ -9,6 +9,7 @@ export default class StorixPhotos extends LitElement {
 
   static styles = css`
     :host {
+      position: relative;
       overflow: hidden;
       flex: 1 1 auto;
     }
@@ -27,10 +28,65 @@ export default class StorixPhotos extends LitElement {
 
       overflow: scroll;
       scrollbar-width: none;
+      padding-right: 20px;
     }
 
     ul::-webkit-scrollbar {
       display: none;
+    }
+
+    .year-scrubber {
+      position: absolute;
+      top: 0;
+      right: 4px;
+      bottom: 0;
+      width: 14px;
+      display: flex;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    .year-marker {
+      position: relative;
+      flex-grow: 1;
+      min-height: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .year-marker::before {
+      content: '';
+      width: 4px;
+      height: 100%;
+      border-radius: 2px;
+      background-color: rgba(0, 0, 0, 0.15);
+      transition: 150ms ease-in-out all;
+    }
+
+    .year-marker:hover::before,
+    .year-marker.active::before {
+      background-color: var(--primary-color);
+    }
+
+    .year-label {
+      position: absolute;
+      right: 18px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 13px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: 150ms ease-in-out opacity;
+    }
+
+    .year-marker:hover .year-label,
+    .year-marker.active .year-label {
+      opacity: 1;
     }
 
     ul > li {
@@ -169,6 +225,12 @@ export default class StorixPhotos extends LitElement {
     },
     page: {
       typeof: Number
+    },
+    _yearCounts: {
+      typeof: Array
+    },
+    _activeYear: {
+      typeof: Number
     }
   }
 
@@ -178,6 +240,8 @@ export default class StorixPhotos extends LitElement {
     this.selectedItems = new Array();
     this._stopFetch = false;
     this.page = 1;
+    this._yearCounts = new Array();
+    this._activeYear = null;
 
     app.photos = this.items;
   }
@@ -188,15 +252,17 @@ export default class StorixPhotos extends LitElement {
         ${repeat(this.items, (items) => items.uuid, this.renderItem.bind(this))}
       </ul>
       ${this.items.length == 0 ? this.renderEmptyList() : ''}
+      ${this._yearCounts.length > 0 ? this.renderYearScrubber() : ''}
     `
   }
 
   firstUpdated () {
     this.list = this.shadowRoot.getElementById('files-list');
+    this.fetchYearCounts();
   }
 
   updated (changeProps) {
-    if ( changeProps.has('page') && !this._stopFetch) {
+    if ( changeProps.has('page') && !this._stopFetch && !this._jumping ) {
       this.fetchPhotos();
     }
 
@@ -246,6 +312,74 @@ export default class StorixPhotos extends LitElement {
       }
     }
 
+    this._updateActiveYearFromScroll();
+
+  }
+
+  async fetchYearCounts () {
+    const result = await app.broker.get('files?filter[p_photos]=true&aggregate=years');
+    this._yearCounts = result.data.map((row) => ({ year: Number(row.year), count: Number(row.count) }));
+  }
+
+  async _jumpToYear (year) {
+
+    // ... how many photos exist before this year starts (newer than it) ...
+    const offset = this._yearCounts
+      .filter((y) => y.year > year)
+      .reduce((sum, y) => sum + y.count, 0);
+
+    this.items = [];
+    this.currentMonth = null;
+    this.currentDay = null;
+    this._stopFetch = false;
+    this._activeYear = year;
+
+    // ... drive this fetch ourselves instead of relying on updated(), so we can
+    // scroll to the exact separator once the page (which may still start with
+    // photos from the previous year, when this year has few photos) has loaded ...
+    this._jumping = true;
+    this.page = Math.floor(offset / 100) + 1;
+
+    try {
+      await this.fetchPhotos();
+    } finally {
+      this._jumping = false;
+    }
+
+    this._scrollToYear(year);
+
+  }
+
+  _scrollToYear (year) {
+
+    if ( !this.list ) return;
+
+    const separator = this.list.querySelector(`li.separator[data-year="${year}"]`);
+    this.list.scrollTop = separator ? separator.offsetTop : 0;
+
+  }
+
+  _updateActiveYearFromScroll () {
+
+    if ( !this.list ) return;
+
+    const separators = this.list.querySelectorAll('li.separator[data-year]:not([data-year=""])');
+    let closest = null;
+    for ( const separator of separators ) {
+      if ( separator.offsetTop <= this.list.scrollTop + 40 ) {
+        closest = separator;
+      } else {
+        break;
+      }
+    }
+
+    if ( !closest ) return;
+
+    const year = Number(closest.dataset.year);
+    if ( !Number.isNaN(year) && year !== this._activeYear ) {
+      this._activeYear = year;
+    }
+
   }
 
   _onImageLoad (e) {
@@ -291,12 +425,15 @@ export default class StorixPhotos extends LitElement {
   }
 
   onScroll (e) {
-    if ( this._stopFetch ) return;
 
     const element = e.currentTarget;
-    if ( element.offsetHeight + element.scrollTop >= element.scrollHeight - 300 ) {
+
+    if ( !this._stopFetch && element.offsetHeight + element.scrollTop >= element.scrollHeight - 300 ) {
       this.page += 1;
     }
+
+    this._updateActiveYearFromScroll();
+
   }
 
   _showPreview (e) {
@@ -332,7 +469,7 @@ export default class StorixPhotos extends LitElement {
       const month_date = item.month ? new Date(item.month) : null;
       const day_date   = item.day ? new Date(item.day) : null;
       return html`
-        <li class="separator">
+        <li class="separator" data-year=${month_date ? month_date.getFullYear() : ''}>
           ${ month_date ? html`<p class="month-title">${StorixText.months[month_date.getMonth()]} ${month_date.getFullYear()}</p>` : '' }
           ${ day_date   ? html`<p class="day-title">${StorixText.days[day_date.getDay()]}, ${day_date.getDate().toString().padStart(2, 0)}/${(day_date.getMonth() + 1).toString().padStart(2, 0)}</p>` : '' }
         </li>
@@ -354,6 +491,22 @@ export default class StorixPhotos extends LitElement {
       <div class="empty-container">
         <storix-icon class="icon-empty" icon="empty-list"></storix-icon>
         <p>Don't exist nothing to show. Uplaod your files</p>
+      </div>
+    `
+  }
+
+  renderYearScrubber () {
+    return html`
+      <div class="year-scrubber">
+        ${this._yearCounts.map((y) => html`
+          <div
+            class="year-marker ${this._activeYear === y.year ? 'active' : ''}"
+            style="flex-grow: ${y.count}"
+            @click=${() => this._jumpToYear(y.year)}
+          >
+            <span class="year-label">${y.year}</span>
+          </div>
+        `)}
       </div>
     `
   }
