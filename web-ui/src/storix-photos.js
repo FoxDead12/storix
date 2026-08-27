@@ -271,13 +271,17 @@ export default class StorixPhotos extends LitElement {
     }
   }
 
-  async fetchPhotos () {
+  async _fetchPageRaw (page) {
+    const result = await app.broker.get('files?filter[p_photos]=true&page=' + page);
+    return result.data;
+  }
 
-    const result = await app.broker.get('files?filter[p_photos]=true&page=' + this.page);
-    const newItems = []
+  // ... turns a raw page of files into { separator } + file entries, appending to this.items ...
+  _appendItems (rawItems) {
 
-    // ... generate separators ...
-    for ( const item of result.data ) {
+    const newItems = [];
+
+    for ( const item of rawItems ) {
 
       const date_day = item.birthtime_date;
       const date_month = item.birthtime_date.slice(0, 7);
@@ -298,13 +302,21 @@ export default class StorixPhotos extends LitElement {
       newItems.push(item);
     }
 
-    // ... force lit to render all images ...
     this.items.push(...newItems);
+
+  }
+
+  async fetchPhotos () {
+
+    const rawItems = await this._fetchPageRaw(this.page);
+    this._appendItems(rawItems);
+
+    // ... force lit to render all images ...
     this.requestUpdate();
     await this.updateComplete;
 
     // ... after lit render ...
-    if ( result.data.length < 100 ) {
+    if ( rawItems.length < 100 ) {
       this._stopFetch = true;
     } else {
       if ( this.list.clientHeight < this.clientHeight ) {
@@ -328,6 +340,8 @@ export default class StorixPhotos extends LitElement {
       .filter((y) => y.year > year)
       .reduce((sum, y) => sum + y.count, 0);
 
+    const targetPage = Math.floor(offset / 100) + 1;
+
     this.items = [];
     this.currentMonth = null;
     this.currentDay = null;
@@ -335,13 +349,35 @@ export default class StorixPhotos extends LitElement {
     this._activeYear = year;
 
     // ... drive this fetch ourselves instead of relying on updated(), so we can
-    // scroll to the exact separator once the page (which may still start with
-    // photos from the previous year, when this year has few photos) has loaded ...
+    // scroll to the exact separator once the last page (which may still start with
+    // photos from the previous year, when this year has few photos) has loaded.
+    // Fetch every page from the top through the target one (in parallel, then applied
+    // in order) instead of just the target page, so scrolling back up afterwards still
+    // has the newer years already loaded, instead of hitting a dead end ...
     this._jumping = true;
-    this.page = Math.floor(offset / 100) + 1;
 
     try {
-      await this.fetchPhotos();
+
+      const pages = await Promise.all(
+        Array.from({ length: targetPage }, (_, i) => this._fetchPageRaw(i + 1))
+      );
+
+      let lastPageLength = 100;
+      for ( const rawItems of pages ) {
+        this._appendItems(rawItems);
+        lastPageLength = rawItems.length;
+      }
+
+      this.requestUpdate();
+      await this.updateComplete;
+
+      if ( lastPageLength < 100 ) {
+        this._stopFetch = true;
+        this.page = targetPage;
+      } else {
+        this.page = targetPage + 1;
+      }
+
     } finally {
       this._jumping = false;
     }
