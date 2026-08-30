@@ -149,14 +149,17 @@ impl JobAbstract for FilesList {
 
 impl FilesList {
 
+    // ... returns per-year AND per-month photo counts in a single query, used by the
+    // gallery's year+month scrubber. Shape: [{ year, count, months: [{ month, count }, ...] }, ...],
+    // years and months both ordered DESC (newest first), months nested under their year ...
     fn get_year_counts (&self, job: &mut brook_http_worker::worker::job::Job, schema: &str) {
 
         let query = format!("
-            SELECT to_char(birthtime, 'YYYY') AS year, COUNT(*)::text AS count
+            SELECT to_char(birthtime, 'YYYY') AS year, to_char(birthtime, 'MM') AS month, COUNT(*)::text AS count
             FROM {}.files
             WHERE type IN ('image', 'video')
-            GROUP BY 1
-            ORDER BY 1 DESC
+            GROUP BY 1, 2
+            ORDER BY 1 DESC, 2 DESC
         ", schema);
 
         let rows = match job.postgres.query(&query, &[]) {
@@ -167,12 +170,36 @@ impl FilesList {
             }
         };
 
-        let mut year_counts: Vec<Value> = Vec::new();
+        struct YearBucket { year: String, count: i64, months: Vec<Value> }
+        let mut buckets: Vec<YearBucket> = Vec::new();
+
         for row in rows {
             let year: Option<String> = row.try_get(0).unwrap_or(None);
-            let count: Option<String> = row.try_get(1).unwrap_or(None);
-            year_counts.push(json!({ "year": year, "count": count }));
+            let month: Option<String> = row.try_get(1).unwrap_or(None);
+            let count_raw: Option<String> = row.try_get(2).unwrap_or(None);
+
+            let year = year.unwrap_or_default();
+            let month = month.unwrap_or_default();
+            let count: i64 = count_raw.and_then(|c| c.parse::<i64>().ok()).unwrap_or(0);
+
+            match buckets.last_mut() {
+                Some(bucket) if bucket.year == year => {
+                    bucket.count += count;
+                    bucket.months.push(json!({ "month": month, "count": count }));
+                }
+                _ => {
+                    buckets.push(YearBucket {
+                        year,
+                        count,
+                        months: vec![json!({ "month": month, "count": count })]
+                    });
+                }
+            }
         }
+
+        let year_counts: Vec<Value> = buckets.into_iter()
+            .map(|b| json!({ "year": b.year, "count": b.count, "months": b.months }))
+            .collect();
 
         self.success_response(job, "Photo year counts", None, Some(serde_json::json!(year_counts)), None);
 

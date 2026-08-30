@@ -6,11 +6,9 @@ export default class StorixHeader extends LitElement {
 
   static styles = css`
     :host {
-      box-shadow:
-        0 1px 1px hsl(0deg 0% 0% / 0.075),
-        0 2px 2px hsl(0deg 0% 0% / 0.075),
-        0 4px 4px hsl(0deg 0% 0% / 0.075),
-        0 8px 8px hsl(0deg 0% 0% / 0.075);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      z-index: 1;
     }
 
     header {
@@ -19,7 +17,7 @@ export default class StorixHeader extends LitElement {
       align-items: center;
       background-color: var(--primary-color);
       color: #fff;
-      padding: 0px 24px;
+      padding: 0px var(--space-5);
     }
 
     h5 {
@@ -194,11 +192,8 @@ export default class StorixHeader extends LitElement {
       uuids.push(item.uuid);
     }
 
-    // const file = await fetch('../fs/download', { method: 'GET', body: JSON.stringify({items: uuids}) });
-    // const blob = await file.blob();
-
     const a = document.createElement("a");
-    a.href = `../fs/download?items=${encodeURIComponent(uuids)}`;;
+    a.href = `/api/download-zip?items=${encodeURIComponent(uuids)}`;
     a.download = "download.zip";
     document.body.appendChild(a);
     a.click();

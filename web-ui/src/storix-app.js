@@ -25,7 +25,7 @@ export default class StorixApp extends LitElement {
       flex: 1 1 auto;
       overflow: auto;
       min-height: 0;
-      padding: 12px 16px;
+      padding: var(--space-3) var(--space-4);
       display: flex;
       flex-direction: column;
     }

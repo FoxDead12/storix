@@ -50,8 +50,6 @@ impl Session {
         let _ = job.redis.hset_multiple::<&std::string::String, &str, std::string::String, String>(&redis_access_key, &redis_access_payload);
         let _ =job.redis.expire::<&std::string::String, String>(&redis_access_key, redis_access_duration);
 
-        return;
-
         // ... create access token in redis (refresh token) ...
         let redis_refresh_key = format!("user:session:{}", refresh_token);
         let redis_refresh_payload = [
@@ -60,11 +58,29 @@ impl Session {
             ("user_email", user_email),
             ("user_schema", user_schema),
             ("user_roles", user_roles),
-            ("acces_refresh_tokentoken", refresh_token)
+            ("refresh_token", refresh_token)
         ];
         let redis_refresh_duration = 2 * 24 * 60 * 60;  // 2 days
         let _ = job.redis.hset_multiple::<&std::string::String, &str, std::string::String, String>(&redis_refresh_key, &redis_refresh_payload);
         let _ = job.redis.expire::<&std::string::String, String>(&redis_refresh_key, redis_refresh_duration);
 
+    }
+
+    // ... fetch the hash stored for a given refresh token, empty map if it doesn't exist / expired ...
+    pub fn get_session (
+        job: &mut brook_http_worker::worker::job::Job,
+        refresh_token: &str
+    ) -> std::collections::HashMap<String, String> {
+        let redis_session_key = format!("user:session:{}", refresh_token);
+        job.redis.hgetall::<&String, std::collections::HashMap<String, String>>(&redis_session_key).unwrap_or_default()
+    }
+
+    // ... invalidate a refresh token session, used after it has been rotated ...
+    pub fn delete_session (
+        job: &mut brook_http_worker::worker::job::Job,
+        refresh_token: &str
+    ) {
+        let redis_session_key = format!("user:session:{}", refresh_token);
+        let _ = job.redis.del::<&String, i32>(&redis_session_key);
     }
 }

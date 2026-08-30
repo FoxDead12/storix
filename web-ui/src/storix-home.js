@@ -12,12 +12,14 @@ export default class StorixHome extends LitElement {
 
     .filter-menus {
       display: flex;
-      background-color: #fff;
-      margin: 0px;
-      padding: 0 24px;
+      background-color: var(--surface-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin: 0px 0px var(--space-3) 0px;
+      padding: 0 var(--space-5);
       justify-content: center;
       align-items: center;
-      gap: 20px;
+      gap: var(--space-5);
       list-style: none;
     }
 
@@ -27,7 +29,7 @@ export default class StorixHome extends LitElement {
       border-radius: 0px;
       border-bottom: 2px solid transparent;
       gap: 10px;
-      transition: 300ms ease-in-out all;
+      transition: 150ms ease-in-out all;
     }
 
     .filter-menus paper-button[active] {
