@@ -231,7 +231,7 @@ export default class StorixPreview extends LitElement {
           ${ this.type == 'photos'
             ? html`
               ${ this._renderImage == true ? html`<img class="thumbnail ${this._loading ? '' : 'ready'}" src="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
-              ${ this._renderVideo == true ? html`<video class="ready" preload="metadata" playsinline webkit-playsinline controls src="/api/download?uuid=${this.item.uuid}" @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+              ${ this._renderVideo == true ? html`<video class="ready" preload="metadata" playsinline webkit-playsinline controls poster="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" src="/api/download?uuid=${this.item.uuid}" @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
               `
             : html`
               <iframe src="/api/download?uuid=${this.item.uuid}" width="100%" height="600"></iframe>
@@ -350,7 +350,14 @@ export default class StorixPreview extends LitElement {
         return;
       }
       if ( this.item.type === 'video' ) {
+        // ... the <video> below has its own poster="" pointing at this same
+        // thumbnail, and is shown immediately (not gated on loadedmetadata):
+        // mobile browsers won't preload a hidden/invisible <video>, and won't
+        // fire loadedmetadata without a user tap, which would otherwise
+        // deadlock - hidden until loaded, loaded only once tapped, but never
+        // tappable while hidden ...
         this._renderVideo = true;
+        this._loading = false;
         return;
       }
     }
@@ -361,9 +368,9 @@ export default class StorixPreview extends LitElement {
   }
 
   _videoLoad (e) {
+    // ... metadata is in, the <video>'s own frame/poster is showing: drop the
+    // now-redundant <img> underneath ...
     this._renderImage = false;
-    this._hideVideo = false;
-    this._loading = false;
   }
 
   _updateNavState () {
