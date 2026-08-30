@@ -204,9 +204,6 @@ export default class StorixPreview extends LitElement {
     _renderVideo: {
       typeof: Boolean
     },
-    _hideVideo: {
-      typeof: Boolean
-    },
     _loading: {
       typeof: Boolean
     },
@@ -304,7 +301,6 @@ export default class StorixPreview extends LitElement {
   _resetStates () {
     this._renderImage = true;
     this._renderVideo = false;
-    this._hideVideo = true;
     this._loading = true;
   }
 

@@ -33,11 +33,19 @@ class StorixPreview extends i {
       max-height: 100vh;
     }
 
+    #content-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
     img,
     video {
+      position: absolute;
+      inset: 0;
       object-fit: contain;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       opacity: 0;
       transition: 200ms ease-in-out opacity;
     }
@@ -199,9 +207,6 @@ class StorixPreview extends i {
     _renderVideo: {
       typeof: Boolean
     },
-    _hideVideo: {
-      typeof: Boolean
-    },
     _loading: {
       typeof: Boolean
     },
@@ -226,7 +231,7 @@ class StorixPreview extends i {
           ${ this.type == 'photos'
             ? x`
               ${ this._renderImage == true ? x`<img class="thumbnail ${this._loading ? '' : 'ready'}" src="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
-              ${ this._renderVideo == true ? x`<video class="${this._loading ? '' : 'ready'}" src="/api/download?uuid=${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+              ${ this._renderVideo == true ? x`<video class="ready" preload="metadata" playsinline webkit-playsinline controls poster="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" src="/api/download?uuid=${this.item.uuid}" @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
               `
             : x`
               <iframe src="/api/download?uuid=${this.item.uuid}" width="100%" height="600"></iframe>
@@ -299,7 +304,6 @@ class StorixPreview extends i {
   _resetStates () {
     this._renderImage = true;
     this._renderVideo = false;
-    this._hideVideo = true;
     this._loading = true;
   }
 
@@ -345,7 +349,14 @@ class StorixPreview extends i {
         return;
       }
       if ( this.item.type === 'video' ) {
+        // ... the <video> below has its own poster="" pointing at this same
+        // thumbnail, and is shown immediately (not gated on loadedmetadata):
+        // mobile browsers won't preload a hidden/invisible <video>, and won't
+        // fire loadedmetadata without a user tap, which would otherwise
+        // deadlock - hidden until loaded, loaded only once tapped, but never
+        // tappable while hidden ...
         this._renderVideo = true;
+        this._loading = false;
         return;
       }
     }
@@ -356,9 +367,9 @@ class StorixPreview extends i {
   }
 
   _videoLoad (e) {
+    // ... metadata is in, the <video>'s own frame/poster is showing: drop the
+    // now-redundant <img> underneath ...
     this._renderImage = false;
-    this._hideVideo = false;
-    this._loading = false;
   }
 
   _updateNavState () {
