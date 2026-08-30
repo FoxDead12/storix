@@ -30,11 +30,19 @@ export default class StorixPreview extends LitElement {
       max-height: 100vh;
     }
 
+    #content-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
     img,
     video {
+      position: absolute;
+      inset: 0;
       object-fit: contain;
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       opacity: 0;
       transition: 200ms ease-in-out opacity;
     }
@@ -223,7 +231,7 @@ export default class StorixPreview extends LitElement {
           ${ this.type == 'photos'
             ? html`
               ${ this._renderImage == true ? html`<img class="thumbnail ${this._loading ? '' : 'ready'}" src="/api/download?uuid=${this.item.uuid}&filter[thumbnail]=true" @load=${this._imageLoad.bind(this)} />` : '' }
-              ${ this._renderVideo == true ? html`<video class="${this._loading ? '' : 'ready'}" src="/api/download?uuid=${this.item.uuid}" controls ?hidden=${this._hideVideo} @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
+              ${ this._renderVideo == true ? html`<video class="ready" preload="metadata" playsinline webkit-playsinline controls src="/api/download?uuid=${this.item.uuid}" @loadedmetadata=${this._videoLoad.bind(this)}></video>` : '' }
               `
             : html`
               <iframe src="/api/download?uuid=${this.item.uuid}" width="100%" height="600"></iframe>
