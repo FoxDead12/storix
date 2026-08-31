@@ -96,7 +96,10 @@ impl JobAbstract for LoginJob {
     let headers = json!({
         "Set-Cookie": [
             format!("token={access_token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600"),
-            format!("refresh={refresh_token}; Path=/api/session-refresh; HttpOnly; Secure; SameSite=Strict; Max-Age=172800")
+            // not HttpOnly on purpose: the frontend reads this cookie via JS to send it as the
+            // refresh_token body field on PATCH /api/session-refresh (brook doesn't forward
+            // cookies into the job payload for public/unauthenticated routes)
+            format!("refresh={refresh_token}; Path=/; Secure; SameSite=Strict; Max-Age=172800")
         ]
     });
 

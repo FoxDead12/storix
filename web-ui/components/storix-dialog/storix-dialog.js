@@ -16,22 +16,25 @@ export default class StorixDialog extends LitElement {
     dialog {
       padding: 0px;
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       top: 0px;
       left: 0px;
       outline: none;
       max-width: 90vw;
       max-height: 90vh;
       overflow: hidden;
+      box-shadow: var(--shadow-lg);
     }
 
     dialog[open] {
       display: flex;
       flex-direction: column;
+      min-height: 0;
     }
 
     .header {
-      padding: 12px 16px;
+      flex: 0 0 auto;
+      padding: var(--space-3) var(--space-4);
       margin: 0;
       display: flex;
       align-items: center;
@@ -41,17 +44,19 @@ export default class StorixDialog extends LitElement {
 
     .pages-container {
       box-sizing: border-box;
-      padding: 12px 16px;
+      padding: var(--space-4);
       margin: 0;
       width: 700px;
+      height: min(70vh, 500px);
       aspect-ratio: 16/9;
+      min-height: 0;
       display: flex;
     }
 
     @media (max-width: 768px) {
       .pages-container {
         width: 100%;
-        min-height: 500px;
+        height: min(95vh, 560px);
       }
     }
 
@@ -61,10 +66,13 @@ export default class StorixDialog extends LitElement {
       display: flex;
       width: 100%;
       height: 100%;
+      min-height: 0;
+      min-width: 0;
     }
 
     .footer {
-      padding: 12px 16px;
+      flex: 0 0 auto;
+      padding: var(--space-3) var(--space-4);
       box-shadow: rgba(149, 157, 165, 0.2) 0px -8px 24px;
       display: flex;
       justify-content: flex-end;
@@ -100,7 +108,7 @@ export default class StorixDialog extends LitElement {
       margin: 0px;
       background-color: var(--primary-color);
       color: #fff;
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
     }
 
   `;

@@ -15,21 +15,20 @@ export default class StorixLogin extends LitElement {
       height: 100%;
     }
 
+    :host {
+      background: linear-gradient(160deg, var(--background-body) 0%, var(--primary-color-10) 100%);
+    }
+
     form {
       display: flex;
       flex-direction: column;
-      background: #fff;
+      background: var(--surface-color);
       width: 450px;
-      border-radius: 10px;
+      border-radius: var(--radius-lg);
       margin: auto;
-      padding: 16px 12px;
-      gap: 12px;
-      box-shadow:
-        0 1px 1px hsl(0deg 0% 0% / 0.075),
-        0 2px 2px hsl(0deg 0% 0% / 0.075),
-        0 4px 4px hsl(0deg 0% 0% / 0.075),
-        0 8px 8px hsl(0deg 0% 0% / 0.075),
-        0 16px 16px hsl(0deg 0% 0% / 0.075);
+      padding: var(--space-6) var(--space-5);
+      gap: var(--space-4);
+      box-shadow: var(--shadow-lg);
     }
 
     h1 {

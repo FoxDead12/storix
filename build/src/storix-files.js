@@ -1,0 +1,177 @@
+import { a as i, i as i$1, x } from '../lit-element-build.js';
+import { c } from '../repeat-build.js';
+import '../storix-icon-build.js';
+
+class StorixFiles extends i {
+
+  static styles = i$1`
+    :host {
+      overflow: hidden;
+      flex: 1 1 auto;
+    }
+
+    ul {
+      max-height: 100%;
+      list-style: none;
+
+      padding: 0px;
+      margin: 0px;
+      gap: 0.5rem;
+
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-auto-rows: 100px;
+
+      overflow: scroll;
+      scrollbar-width: none;
+    }
+
+    ul::-webkit-scrollbar {
+      display: none;
+    }
+
+    li {
+      position: relative;
+      grid-column: span 1;
+      grid-row: span 1;
+      border-radius: 5px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 8px;
+    }
+
+    li:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    li > storix-icon {
+      width: 48px;
+      height: 48px;
+      --icon-stroke-width: 1;
+      margin: auto;
+    }
+
+    li > p {
+      padding: 0px;
+      margin: 0px;
+      font-size: 14px;
+      color: var(--text-color);
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .empty-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .icon-empty {
+      --icon-max-width: 650px;
+      --icon-width: 100%;
+      --icon-height: 100%;
+    }
+
+
+  `;
+
+  static properties = {
+    items: {
+      typeof: Array
+    },
+    page: {
+      typeof: Number
+    }
+  }
+
+  constructor () {
+    super();
+    this.items = [];
+    this.page = 1;
+  }
+
+  render () {
+    return x`
+
+      <ul class="files-list" id="files-list" @scroll=${this.onScroll.bind(this)}>
+        ${c(this.items, (items) => items.id, this.renderItem.bind(this))}
+      </ul>
+      ${this.items.length == 0 ? this.renderEmptyList() : ''}
+
+    `
+  }
+
+  firstUpdated () {
+    this.list = this.shadowRoot.getElementById('files-list');
+  }
+
+
+  updated (changeProps) {
+    // .. some one change page, so is time to add load new items ...
+    if ( changeProps.has('page') && !this._stopFetch) {
+      this.fetchFiles();
+    }
+  }
+
+  async fetchFiles () {
+
+    // ... request files from server ...
+    const result = await app.broker.get('files?filter[p_files]=true&page=' + this.page);
+    this.items.push(...result.data);
+
+    // ... make lit update DOM, and await DOM be ready ...
+    this.requestUpdate();
+    await this.updateComplete;
+
+    // ... check if is necessary keep render more data ...
+    if ( result.data.length < 100 ) {
+      this._stopFetch = true;
+    } else {
+      if ( this.list.clientHeight < this.clientHeight ) {
+        this.page += 1;
+      }
+    }
+
+  }
+
+  onScroll (e) {
+    if ( this._stopFetch ) return;
+
+    const element = e.currentTarget;
+    if ( element.offsetHeight + element.scrollTop >= element.scrollHeight - 100 ) {
+      this.page += 1;
+    }
+  }
+
+  _showPreview (e) {
+    const item = e.currentTarget.item;
+    app.openPreview(item, 'files');
+  }
+
+  renderItem (item) {
+    return x`
+      <li @click=${this._showPreview.bind(this)} .item=${item}>
+        <storix-icon icon="document"></storix-icon>
+        <p>${item.description}</p>
+      </li>
+    `;
+
+  }
+
+  renderEmptyList () {
+    return x`
+      <div class="empty-container">
+        <storix-icon class="icon-empty" icon="empty-list"></storix-icon>
+        <p>Don't exist nothing to show. Uplaod your files</p>
+      </div>
+    `
+  }
+}
+
+customElements.define('storix-files', StorixFiles);
+
+export { StorixFiles as default };

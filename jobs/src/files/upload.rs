@@ -225,7 +225,7 @@ impl JobAbstract for Upload {
 }
 
 // ... generates a random uuid v4 string, avoids pulling the `uuid` crate for a single format ...
-fn generate_uuid_v4() -> String {
+pub fn generate_uuid_v4() -> String {
   let mut bytes = [0u8; 16];
   for b in bytes.iter_mut() {
     *b = rand::random::<u8>();

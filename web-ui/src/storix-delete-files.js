@@ -9,18 +9,18 @@ export default class StorixDeleteFiles extends StorixDialogPage {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: var(--space-4);
     }
 
     .warning-info {
       color: #004085;
       background-color: #cce5ff;
       border-color: #b8daff;
-      border-radius: 5px;
-      padding: 12px;
+      border-radius: var(--radius-sm);
+      padding: var(--space-3);
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: var(--space-2);
     }
 
     .warning-info > p,
@@ -108,7 +108,7 @@ export default class StorixDeleteFiles extends StorixDialogPage {
 
   async deleteItem (item) {
     try {
-      await app.broker.delete('../fs/files/' + item.uuid);
+      await app.broker.delete('files?uuid=' + item.uuid);
     } catch (e) {
       console.error(e);
     }
