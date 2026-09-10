@@ -210,9 +210,11 @@ export default class StorixPhotos extends LitElement {
     }
 
     ul > li > img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       color: transparent;
-      transition: 200ms all ease-in-out;
+      transition: 200ms transform ease-in-out;
       border-radius: var(--radius-sm);
     }
 
@@ -761,9 +763,6 @@ export default class StorixPhotos extends LitElement {
     const parent = img.parentElement;
 
     const isLandscape = img.width > img.height;
-
-    img.style.width = '100%';
-    img.style.height = '100%';
 
     if (isLandscape) {
       parent.setAttribute('style', 'grid-column: span 6; grid-row: span 4;');
