@@ -10,3 +10,5 @@ web-ui/dist
 
 jobs/target
 jobs/.env
+
+build/
