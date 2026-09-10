@@ -207,7 +207,7 @@ export default class StorixDialog extends LitElement {
   }
 
   async _focusPage (page) {
-    await app.importModule(`./${page}.js`);
+    await app.importModule(page);
     const elementPage = this.shadowRoot.querySelector(page);
     elementPage.scrollTo();
     elementPage.enter();

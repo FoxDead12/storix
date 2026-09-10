@@ -83,8 +83,11 @@ export default class StorixApp extends LitElement {
   // ********************************************* //
   // app methods                                   //
   // ********************************************* //
-  async importModule (src) {
-    await import(src);
+  async importModule (name) {
+    // ... in dev there's no manifest (no hash in filenames), in build the
+    // manifest maps the logical component name to its hashed filename ...
+    const fileName = (window.__MANIFEST__ && window.__MANIFEST__[name]) || `${name}.js`;
+    await import(`./${fileName}`);
   }
 
   /**
@@ -98,7 +101,7 @@ export default class StorixApp extends LitElement {
     const url = new URL(urlPath, window.location.origin);
     const component = this.routes.getComponentFromRoute(url.pathname);
 
-    await this.importModule(`./${component}.js`);
+    await this.importModule(component);
     const element = document.createElement(component);
     this.currentPage = element;
 
